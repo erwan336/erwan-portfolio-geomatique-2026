@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NDVI Marseille 2024 — WebMap</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html,body,#map{height:100%;margin:0;background:#0b0b0b}
+    .legend{position:absolute;bottom:14px;right:14px;background:rgba(20,20,35,.9);color:#eee;padding:10px 12px;border-radius:12px;font:13px system-ui;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .legend .bar{width:160px;height:10px;background:linear-gradient(to right,#a52a2a,#ffd34d,#2ca25f);border-radius:6px;margin:6px 0}
+    .opacity{position:absolute;top:14px;right:14px;background:rgba(20,20,35,.9);color:#eee;padding:8px 10px;border-radius:12px;font:13px system-ui;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+    .opacity input{width:160px}
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="opacity">Opacité NDVI <input id="op" type="range" min="0" max="1" step="0.05" value="0.85"></div>
+  <div class="legend"><strong>NDVI 2024 — Marseille</strong><div class="bar"></div><div style="display:flex;justify-content:space-between"><span>-1</span><span>0</span><span>+1</span></div></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  (async () => {
+    const map = L.map('map').setView([43.3, 5.4], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const boundsUrl = 'bounds.json';
+    const pngUrl    = 'ndvi_marseille_2024.png';
+
+    try {
+      const resp = await fetch(boundsUrl);
+      if (!resp.ok) throw new Error('bounds.json introuvable');
+      const { leaflet_bounds } = await resp.json();
+
+      const ndvi = L.imageOverlay(pngUrl, leaflet_bounds, { opacity: 0.85 }).addTo(map);
+      map.fitBounds(leaflet_bounds);
+
+      document.getElementById('op').addEventListener('input', e => ndvi.setOpacity(parseFloat(e.target.value)));
+    } catch (err) {
+      console.error(err);
+      alert('Erreur de chargement des données de la carte (voir Console).');
+    }
+  })();
+  </script>
+</body>
+</html>

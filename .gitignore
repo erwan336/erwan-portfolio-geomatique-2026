@@ -1,0 +1,20 @@
+# IDE / Python
+.vscode/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Données lourdes
+*.tif
+*.tiff
+*.geotiff
+*.zip
+
+# Code serveur non utilisé par GitHub Pages
+src/
+*.php
+
+# Divers
+.DS_Store
+Thumbs.db

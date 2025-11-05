@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marseille — Espaces verts & Heatmap</title>
+
+  <!-- Leaflet + plugins depuis CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100vh; }
+    .legend {
+      position: absolute; bottom: 14px; left: 14px; z-index: 1000;
+      background: rgba(18,18,28,.9); color: #e8f5e9;
+      padding: 10px 12px; border-radius: 10px; font: 13px system-ui, Arial;
+      box-shadow: 0 8px 20px rgba(0,0,0,.2);
+    }
+    .legend i { width: 12px; height: 12px; display:inline-block; margin-right:6px; border-radius:2px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Légende -->
+  <div class="legend">
+    <div><b>Marseille</b></div>
+    <div><i style="background:#0ea5e9"></i> Limite communale</div>
+    <div><i style="background:#4caf50"></i> Espaces verts (polygones)</div>
+    <div>Heatmap = intensité (surface cumulée)</div>
+  </div>
+
+  <!-- Ton code -->
+  <script src="./app.js"></script>
+</body>
+</html>

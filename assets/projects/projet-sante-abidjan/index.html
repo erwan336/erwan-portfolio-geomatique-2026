@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accès aux soins – Abidjan</title>
+
+  <!-- Leaflet + Chart.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#0f1220;color:#e9f0ff}
+    header{padding:12px 16px;background:#13162b;border-bottom:1px solid #232742}
+    .wrap{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;padding:12px}
+    #map{height:78vh;border-radius:12px}
+    .card{background:#0d1022;border:1px solid #232742;border-radius:12px;padding:12px}
+    .panel-title{margin:0 0 6px;font-size:16px}
+    .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}
+    .kpi{background:#0b0e1b;border:1px solid #232742;border-radius:10px;padding:8px;text-align:center}
+    .kpi-number{font-size:20px;font-weight:700}
+    .controls{display:grid;gap:8px;margin-bottom:8px}
+    .controls label{display:flex;gap:8px;justify-content:space-between;align-items:center;font-size:13px}
+    .controls select,.controls input[type=range]{flex:1;background:#0b0e1b;border:1px solid #232742;color:#e9f0ff;border-radius:8px;padding:6px}
+    .btn{background:#193058;border:1px solid #285fad;color:#e6f0ff;border-radius:10px;padding:8px;cursor:pointer}
+    #table-wrap{max-height:240px;overflow:auto;border:1px solid #232742;border-radius:10px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:8px;border-bottom:1px solid #1d2240;text-align:left}
+    thead th{position:sticky;top:0;background:#13162b}
+    @media(max-width:1000px){.wrap{grid-template-columns:1fr}#map{height:60vh}}
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1 style="margin:0;font-size:18px;">Accès aux soins – Abidjan</h1>
+    <div style="font-size:12px;opacity:.8">Source : OpenStreetMap (Overpass) – Communes OSM</div>
+  </header>
+
+  <div class="wrap">
+    <div id="map" class="card"></div>
+
+    <aside class="card">
+      <h2 class="panel-title">Tableau de bord</h2>
+
+      <div class="kpis">
+        <div class="kpi"><div id="kpi-total" class="kpi-number">–</div><div>Total</div></div>
+        <div class="kpi"><div id="kpi-hosp" class="kpi-number">–</div><div>Hosp.+Clin.</div></div>
+        <div class="kpi"><div id="kpi-pharm" class="kpi-number">–</div><div>Pharmacies</div></div>
+      </div>
+
+      <h3 style="margin:8px 0 6px;font-size:14px;">Contrôles</h3>
+      <div class="controls">
+        <label>Type :
+          <select id="filter-type">
+            <option value="all">Tous</option>
+            <option value="hospital">Hôpital</option>
+            <option value="clinic">Clinique</option>
+            <option value="doctors">Médecins</option>
+            <option value="pharmacy">Pharmacie</option>
+          </select>
+        </label>
+        <label>Affichage :
+          <select id="view-mode">
+            <option value="points">Points</option>
+            <option value="choropleth">Choroplèthe</option>
+          </select>
+        </label>
+        <label>Commune :
+          <select id="commune-select">
+            <option value="__all__">Toutes</option>
+          </select>
+        </label>
+        <label>Seuil minimum (total) :
+          <input id="min-threshold" type="range" min="0" max="100" step="1" value="0">
+          <span id="min-threshold-val">0</span>
+          <div class="col-12 mt-2">
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" id="toggle-cluster" checked>
+    <label class="form-check-label" for="toggle-cluster">Activer le clustering</label>
+  </div>
+</div>
+        </label>
+        <button id="btn-reset" class="btn">Réinitialiser</button>
+      </div>
+
+      <h3 style="margin:8px 0 6px;font-size:14px;">Top 10 communes</h3>
+      <canvas id="bar"></canvas>
+
+      <h3 style="margin:10px 0 6px;font-size:14px;">Détail par commune</h3>
+      <div id="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Commune</th><th>Total</th><th>Hosp.+Clin.</th><th>Pharm.</th><th>Méd.</th></tr>
+          </thead>
+          <tbody id="commune-tbody"><tr><td colspan="5">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Script en bas, après le HTML -->
+  <script src="./app.js" defer></script>
+</body>
+</html>
