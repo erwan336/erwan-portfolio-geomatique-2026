@@ -260,7 +260,7 @@
     // Hero paragraph
     const heroDesc = document.querySelector('.home_profession');
     if (heroDesc) {
-      heroDesc.textContent = 'Passionné par la géomatique et la télédétection, je recherche un stage ou une alternance pour mettre en pratique mes compétences en analyse spatiale, traitement d’images satellites et développement d’applications cartographiques. Étudiant en Master Géomatique et Modélisation Spatiale à l’Université Aix‑Marseille, je m’intéresse aux applications de la télédétection pour la gestion durable des ressources naturelles, la modélisation environnementale et l’innovation géospatiale. Géomaticien / Data Analyste SIG.';
+      heroDesc.textContent = "Passionné par la géomatique, l’analyse spatiale et la data, je suis étudiant en Master Géomatique et Modélisation Spatiale à l’Université Aix-Marseille et stagiaire au Centre Léon Bérard (Lyon) en tant que Geo Data Analyst. Mes missions portent sur l’étude de la distribution spatio-temporelle de certains cancers et l’exploration de pistes explicatives à travers des méthodes SIG et statistiques : structuration et analyse de données, cartographie, indicateurs, et tableaux de bord interactifs. Mon objectif est de transformer des données complexes en informations lisibles et actionnables, au service de la compréhension des maladies et de l’aide à la décision.";
     }
 
     // About paragraph
