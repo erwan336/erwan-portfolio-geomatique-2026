@@ -1,446 +1,1340 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erwan N'guesan</title>
-    <!-- boostrap cdn-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    
-    <!--swippers css-->
-   
-    <!--lien box icon--> 
-    <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erwan N'Guessan — Géomaticien & Data Analyste SIG</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 
-    </head>
-    <script src="assets/js/projects.js" defer></script>
+  <style>
+    /* ============================================================
+       VARIABLES & RESET
+    ============================================================ */
+    :root {
+      --bg:        #162036;
+      --bg2:       #1b2a44;
+      --bg3:       #1f304c;
+      --border:    rgba(0,200,180,.18);
+      --accent:    #00c8b4;
+      --accent2:   #0af;
+      --accent3:   #7ef0a0;
+      --text:      #e8edf5;
+      --muted:     #6b7d99;
+      --grid:      rgba(0,200,180,.09);
+      --glow:      0 0 40px rgba(0,200,180,.18);
+    }
+    body.light{
+      --bg:        #f0f4f8;
+      --bg2:       #e2eaf4;
+      --bg3:       #d4e0ee;
+      --text:      #0e1a2e;
+      --muted:     #4a6080;
+      --border:    rgba(0,150,130,.2);
+      --grid:      rgba(0,150,130,.08);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth;font-size:16px}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'DM Sans',sans-serif;
+      overflow-x:hidden;
+      cursor:none;
+    }
+    body,section,nav,footer,
+    .service-card,.project-card,.map-card,.video-card,.cert-card{
+      transition:background .4s ease,color .4s ease,border-color .3s ease;
+    }
 
+    /* ============================================================
+       CUSTOM CURSOR
+    ============================================================ */
+    .cursor{
+      position:fixed;width:10px;height:10px;
+      background:var(--accent);border-radius:50%;
+      pointer-events:none;z-index:9999;
+      transition:transform .1s ease;
+      mix-blend-mode:screen;
+    }
+    .cursor-ring{
+      position:fixed;width:36px;height:36px;
+      border:1px solid rgba(0,200,180,.5);border-radius:50%;
+      pointer-events:none;z-index:9998;
+      transition:all .18s ease;
+    }
+
+    /* ============================================================
+       MAP GRID BACKGROUND
+    ============================================================ */
+    body::before{
+      content:'';
+      position:fixed;inset:0;
+      background-image:
+        linear-gradient(var(--grid) 1px,transparent 1px),
+        linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+      background-size:60px 60px;
+      pointer-events:none;z-index:0;
+    }
+    body::after{
+      content:'';
+      position:fixed;inset:0;
+      background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,200,180,.07) 0%, transparent 70%);
+      pointer-events:none;z-index:0;
+    }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:1.2rem 4rem;
+      background:rgba(6,11,20,.85);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-logo{
+      font-family:'Space Mono',monospace;
+      font-size:.85rem;letter-spacing:.15em;
+      color:var(--accent);text-decoration:none;
+      display:flex;align-items:center;gap:.6rem;
+    }
+    .nav-logo::before{
+      content:'◉';font-size:1.1rem;
+      animation:pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .nav-links{display:flex;gap:2.5rem;list-style:none}
+    .nav-links a{
+      font-family:'Space Mono',monospace;
+      font-size:.72rem;letter-spacing:.12em;
+      color:var(--muted);text-decoration:none;
+      text-transform:uppercase;
+      transition:color .2s;
+      position:relative;
+    }
+    .nav-links a::after{
+      content:'';
+      position:absolute;bottom:-3px;left:0;width:0;height:1px;
+      background:var(--accent);transition:width .3s ease;
+    }
+    .nav-links a:hover{color:var(--accent)}
+    .nav-links a:hover::after{width:100%}
+    .nav-coords{
+      font-family:'Space Mono',monospace;
+      font-size:.7rem;color:var(--muted);
+      letter-spacing:.05em;
+    }
+    .nav-toggle{display:none;color:var(--accent);font-size:1.5rem;cursor:pointer}
+    #theme-toggle{
+      width:44px;height:44px;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:transparent;border:1px solid var(--border);
+      color:var(--muted);cursor:pointer;
+      border-radius:10px;
+      transition:color .2s,border-color .2s;
+      margin-left:1rem;
+    }
+    #theme-toggle:hover{color:var(--accent);border-color:var(--accent)}
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero{
+      position:relative;
+      min-height:100vh;
+      display:flex;align-items:center;
+      padding:0 4rem;
+      overflow:hidden;
+    }
+    /* Topographic rings */
+    .topo-rings{
+      position:absolute;right:-8rem;top:50%;transform:translateY(-50%);
+      width:700px;height:700px;
+      pointer-events:none;
+    }
+    .topo-rings circle{
+      fill:none;
+      stroke:rgba(0,200,180,.06);
+      stroke-width:1;
+    }
+    .topo-rings circle:nth-child(even){stroke:rgba(0,170,255,.04)}
+
+    .hero-content{position:relative;z-index:2;max-width:700px}
+    .hero-visual{
+      margin-left:auto;
+      width:min(1000px,64vw);
+      aspect-ratio: 4 / 3;
+      border:1px solid rgba(0,200,180,.25);
+      border-radius:18px;
+      padding:0;
+      background:rgba(7,18,32,.35);
+      box-shadow:0 14px 40px rgba(0,0,0,.35);
+      z-index:2;
+      overflow:hidden;
+    }
+    .hero-visual img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:12px;
+      display:block;
+    }
+    .hero-tag{
+      display:inline-flex;align-items:center;gap:.5rem;
+      font-family:'Space Mono',monospace;
+      font-size:.7rem;letter-spacing:.2em;
+      color:var(--accent);text-transform:uppercase;
+      padding:.4rem 1rem;
+      border:1px solid rgba(0,200,180,.3);
+      border-radius:2px;margin-bottom:2rem;
+    }
+    .hero-tag::before{content:'◈ '}
+    h1.hero-name{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(3rem,6vw,5.5rem);
+      font-weight:800;line-height:.95;
+      letter-spacing:-.02em;
+      margin-bottom:1rem;
+    }
+    .hero-name .line2{
+      -webkit-text-stroke:1px var(--accent);
+      color:transparent;
+    }
+    .hero-roles{
+      font-family:'Space Mono',monospace;
+      font-size:1rem;color:var(--accent2);
+      margin-bottom:1.5rem;
+      min-height:1.5rem;
+    }
+    .hero-roles::before{content:'> ';color:var(--accent)}
+    .hero-roles .cursor-blink{
+      display:inline-block;width:2px;height:1em;
+      background:var(--accent);margin-left:2px;
+      animation:blink .8s step-end infinite;
+      vertical-align:middle;
+    }
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+    .hero-bio{
+      font-size:1rem;line-height:1.8;
+      color:rgba(232,237,245,.7);
+      max-width:560px;margin-bottom:2.5rem;
+      border-left:2px solid var(--accent);
+      padding-left:1.2rem;
+    }
+    body.light .hero-bio,
+    body.light .about-text p,
+    body.light .contact-info p{color:rgba(14,26,46,.75)}
+    body.light .skill-bar-track{background:rgba(0,0,0,.08)}
+    body.light nav{background:rgba(240,244,248,.92)}
+    body.light .form-field input,
+    body.light .form-field textarea{
+      background:rgba(0,0,0,.04);
+      color:var(--text);
+    }
+    body.light .project-overlay{
+      background:linear-gradient(to top, rgba(240,244,248,.97) 0%, transparent 60%);
+    }
+    .hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
+    .btn-primary-geo{
+      display:inline-flex;align-items:center;gap:.6rem;
+      padding:.85rem 2rem;
+      background:var(--accent);color:var(--bg);
+      font-family:'Space Mono',monospace;
+      font-size:.78rem;letter-spacing:.1em;
+      font-weight:700;text-decoration:none;
+      border:none;cursor:pointer;
+      clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);
+      transition:all .2s;
+    }
+    .btn-primary-geo:hover{background:#00e8d0;transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,200,180,.4)}
+    .btn-outline-geo{
+      display:inline-flex;align-items:center;gap:.6rem;
+      padding:.85rem 2rem;
+      background:transparent;color:var(--accent);
+      font-family:'Space Mono',monospace;
+      font-size:.78rem;letter-spacing:.1em;
+      font-weight:700;text-decoration:none;
+      border:1px solid rgba(0,200,180,.4);cursor:pointer;
+      clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 0);
+      transition:all .2s;
+    }
+    .btn-outline-geo:hover{border-color:var(--accent);background:rgba(0,200,180,.08);transform:translateY(-2px)}
+
+    /* Social */
+    .hero-social{display:flex;gap:1rem}
+    .social-link{
+      width:40px;height:40px;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid var(--border);
+      color:var(--muted);font-size:1.2rem;
+      text-decoration:none;
+      transition:all .2s;
+      position:relative;overflow:hidden;
+    }
+    .social-link::before{
+      content:'';
+      position:absolute;inset:0;
+      background:rgba(0,200,180,.1);
+      transform:scaleX(0);transform-origin:left;
+      transition:transform .2s;
+    }
+    .social-link:hover{color:var(--accent);border-color:var(--accent)}
+    .social-link:hover::before{transform:scaleX(1)}
+
+    /* Scroll indicator */
+    .scroll-hint{
+      position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      color:var(--muted);letter-spacing:.2em;text-transform:uppercase;
+      display:flex;flex-direction:column;align-items:center;gap:.6rem;
+    }
+    .scroll-hint .line{
+      width:1px;height:50px;
+      background:linear-gradient(to bottom,var(--accent),transparent);
+      animation:scrollDown 1.8s ease-in-out infinite;
+    }
+    @keyframes scrollDown{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+
+    /* ============================================================
+       SECTION COMMONS
+    ============================================================ */
+    section{position:relative;z-index:1;padding:7rem 4rem}
+    .section-label{
+      display:inline-flex;align-items:center;gap:.8rem;
+      font-family:'Space Mono',monospace;font-size:.68rem;
+      letter-spacing:.25em;color:var(--accent);text-transform:uppercase;
+      margin-bottom:1rem;
+    }
+    .section-label::before{content:'——'}
+    h2.section-title{
+      font-family:'Syne',sans-serif;
+      font-size:clamp(2rem,4vw,3.2rem);
+      font-weight:800;line-height:1;
+      letter-spacing:-.02em;
+      margin-bottom:4rem;
+    }
+    h2.section-title span{color:var(--accent)}
+
+    /* ============================================================
+       ABOUT
+    ============================================================ */
+    .about-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:5rem;align-items:center;
+    }
+    .about-img-wrap{
+      position:relative;
+    }
+    .about-img-wrap img{
+      width:100%;aspect-ratio:3/4;object-fit:cover;
+      filter:grayscale(30%) contrast(1.1);
+    }
+    .about-img-frame{
+      position:absolute;inset:0;
+      border:1px solid rgba(0,200,180,.3);
+      transform:translate(12px,12px);
+      pointer-events:none;
+    }
+    .about-img-badge{
+      position:absolute;bottom:-1.5rem;right:-1.5rem;
+      background:var(--bg3);border:1px solid var(--border);
+      padding:1rem 1.4rem;
+      font-family:'Space Mono',monospace;font-size:.7rem;
+    }
+    .about-img-badge strong{color:var(--accent);font-size:1.4rem;display:block}
+    .about-text p{
+      font-size:1.05rem;line-height:1.9;
+      color:rgba(232,237,245,.75);
+      margin-bottom:2rem;
+    }
+    .about-text p strong{color:var(--accent)}
+
+    /* Stats table */
+    .stats-table{
+      width:100%;border-collapse:collapse;
+      font-family:'Space Mono',monospace;font-size:.78rem;
+      margin-top:2rem;
+    }
+    .stats-table thead tr{
+      border-bottom:1px solid var(--accent);
+    }
+    .stats-table th{
+      padding:.7rem 1rem .7rem 0;
+      color:var(--accent);font-weight:700;
+      letter-spacing:.1em;text-align:left;
+    }
+    .stats-table td{
+      padding:.7rem 1rem .7rem 0;
+      color:var(--muted);
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .stats-table tr:hover td{color:var(--text);background:rgba(0,200,180,.04)}
+
+    /* ============================================================
+       SERVICES
+    ============================================================ */
+    .services-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px;
+      background:var(--border);
+    }
+    .service-card{
+      background:var(--bg2);
+      padding:3rem 2.5rem;
+      position:relative;overflow:hidden;
+      transition:all .3s ease;
+    }
+    .service-card::before{
+      content:'';
+      position:absolute;top:0;left:0;width:3px;height:0;
+      background:var(--accent);
+      transition:height .4s ease;
+    }
+    .service-card:hover::before{height:100%}
+    .service-card:hover{background:var(--bg3);transform:translateY(-4px)}
+    .service-num{
+      font-family:'Space Mono',monospace;font-size:.7rem;
+      color:var(--muted);letter-spacing:.15em;margin-bottom:1.5rem;
+    }
+    .service-icon{
+      font-size:2.2rem;color:var(--accent);margin-bottom:1.5rem;display:block;
+    }
+    .service-card h3{
+      font-family:'Syne',sans-serif;font-weight:700;
+      font-size:1.2rem;margin-bottom:1rem;
+    }
+    .service-card p{
+      font-size:.9rem;line-height:1.8;color:var(--muted);
+    }
+    .service-tags{
+      display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.5rem;
+    }
+    .service-tag{
+      font-family:'Space Mono',monospace;font-size:.62rem;
+      letter-spacing:.08em;
+      padding:.25rem .6rem;
+      border:1px solid var(--border);
+      color:var(--muted);
+    }
+
+    /* ============================================================
+       PROJECTS
+    ============================================================ */
+    .project-filters{
+      display:flex;gap:0;margin-bottom:3rem;
+      border:1px solid var(--border);
+      width:fit-content;
+    }
+    .filter-btn{
+      font-family:'Space Mono',monospace;font-size:.7rem;
+      letter-spacing:.12em;text-transform:uppercase;
+      padding:.7rem 1.5rem;
+      background:transparent;color:var(--muted);
+      border:none;border-right:1px solid var(--border);
+      cursor:pointer;transition:all .2s;
+    }
+    .filter-btn:last-child{border-right:none}
+    .filter-btn.active,.filter-btn:hover{
+      background:rgba(0,200,180,.12);color:var(--accent);
+    }
+    .projects-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+    }
+    .project-card{
+      background:var(--bg2);
+      border:1px solid var(--border);
+      overflow:hidden;
+      position:relative;
+      transition:all .3s ease;
+    }
+    .project-card:hover{border-color:rgba(0,200,180,.4);transform:translateY(-6px);box-shadow:var(--glow)}
+    .project-card.hidden{display:none}
+    .project-img-wrap{
+      position:relative;overflow:hidden;
+      aspect-ratio:16/10;
+    }
+    .project-img-wrap img{
+      width:100%;height:100%;object-fit:cover;
+      transition:transform .6s ease,filter .4s;
+      filter:saturate(.8);
+    }
+    .project-card:hover .project-img-wrap img{
+      transform:scale(1.06);filter:saturate(1.1);
+    }
+    .project-overlay{
+      position:absolute;inset:0;
+      background:linear-gradient(to top,rgba(6,11,20,.95) 0%,transparent 60%);
+    }
+    .project-category{
+      position:absolute;top:1rem;right:1rem;
+      font-family:'Space Mono',monospace;font-size:.62rem;
+      letter-spacing:.12em;text-transform:uppercase;
+      padding:.3rem .7rem;
+      background:rgba(0,200,180,.15);border:1px solid rgba(0,200,180,.3);
+      color:var(--accent);
+    }
+    .project-body{padding:1.5rem}
+    .project-stack{
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      color:var(--accent);letter-spacing:.1em;margin-bottom:.6rem;
+    }
+    .project-body h3{
+      font-family:'Syne',sans-serif;font-weight:700;
+      font-size:1.05rem;margin-bottom:1rem;
+      line-height:1.3;
+    }
+    .project-links{display:flex;gap:.7rem}
+    .project-link-btn{
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      letter-spacing:.08em;padding:.4rem .9rem;
+      border:1px solid var(--border);color:var(--muted);
+      text-decoration:none;transition:all .2s;
+    }
+    .project-link-btn:hover{color:var(--accent);border-color:var(--accent)}
+    .project-link-btn.primary{
+      background:rgba(0,200,180,.1);color:var(--accent);border-color:rgba(0,200,180,.3);
+    }
+
+    /* ============================================================
+       MAPS GALLERY
+    ============================================================ */
+    .maps-section{background:var(--bg2)}
+    .gallery-scroll{
+      display:flex;gap:1.5rem;overflow-x:auto;padding-bottom:1rem;
+      scrollbar-width:thin;scrollbar-color:var(--accent) var(--bg3);
+    }
+    .gallery-scroll::-webkit-scrollbar{height:4px}
+    .gallery-scroll::-webkit-scrollbar-track{background:var(--bg3)}
+    .gallery-scroll::-webkit-scrollbar-thumb{background:var(--accent)}
+    .map-card{
+      flex:0 0 280px;
+      border:1px solid var(--border);
+      overflow:hidden;background:var(--bg3);
+      transition:all .3s;cursor:pointer;
+    }
+    .map-card:hover{border-color:rgba(0,200,180,.5);transform:translateY(-4px)}
+    .map-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+    .map-card-body{padding:1rem}
+    .map-card-body h4{
+      font-family:'Space Mono',monospace;font-size:.72rem;
+      color:var(--text);margin-bottom:.3rem;
+    }
+    .map-card-body p{
+      font-size:.7rem;color:var(--muted);
+      font-family:'Space Mono',monospace;
+    }
+    .scroll-controls{
+      display:flex;gap:.5rem;margin-top:1.5rem;
+    }
+    .scroll-btn{
+      width:40px;height:40px;
+      background:transparent;border:1px solid var(--border);
+      color:var(--muted);font-size:1rem;cursor:pointer;
+      transition:all .2s;display:flex;align-items:center;justify-content:center;
+    }
+    .scroll-btn:hover{color:var(--accent);border-color:var(--accent)}
+
+    /* ============================================================
+       VIDEOS
+    ============================================================ */
+    .videos-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+    }
+    .video-card{
+      background:var(--bg2);border:1px solid var(--border);overflow:hidden;
+      transition:all .3s;
+    }
+    .video-card:hover{border-color:rgba(0,200,180,.4);transform:translateY(-4px)}
+    .video-card video{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+    .video-card-body{padding:1.2rem}
+    .video-cat{
+      font-family:'Space Mono',monospace;font-size:.62rem;
+      color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem;
+    }
+    .video-card-body h3{
+      font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.5rem;
+    }
+    .video-card-body p{font-size:.85rem;color:var(--muted);line-height:1.6}
+
+    /* ============================================================
+       SKILLS
+    ============================================================ */
+    .skills-layout{
+      display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start;
+    }
+    .skill-video-wrap video{
+      width:100%;border:1px solid var(--border);
+    }
+    .skills-img{width:100%;border:1px solid var(--border)}
+    /* Skill bars */
+    .skill-bars{margin-top:2rem}
+    .skill-bar-item{margin-bottom:1.4rem}
+    .skill-bar-label{
+      display:flex;justify-content:space-between;align-items:center;
+      font-family:'Space Mono',monospace;font-size:.72rem;
+      color:var(--text);margin-bottom:.4rem;
+    }
+    .skill-bar-label span{color:var(--accent)}
+    .skill-bar-track{
+      height:3px;background:rgba(255,255,255,.07);
+      position:relative;
+    }
+    .skill-bar-fill{
+      height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));
+      transform:scaleX(0);transform-origin:left;
+      animation:fillBar 1.2s ease forwards;
+      animation-play-state:paused;
+    }
+    .skill-bar-fill.animate{animation-play-state:running}
+    @keyframes fillBar{to{transform:scaleX(1)}}
+
+    /* ============================================================
+       CERTIFICATIONS
+    ============================================================ */
+    .certs-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
+    }
+    .cert-card{
+      background:var(--bg2);border:1px solid var(--border);
+      padding:2rem;position:relative;overflow:hidden;
+      transition:all .3s;
+    }
+    .cert-card::after{
+      content:'';
+      position:absolute;bottom:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      transform:scaleX(0);transition:transform .3s;transform-origin:left;
+    }
+    .cert-card:hover::after{transform:scaleX(1)}
+    .cert-card:hover{border-color:rgba(0,200,180,.4);transform:translateY(-4px)}
+    .cert-icon{font-size:2rem;color:var(--accent);margin-bottom:1rem;display:block}
+    .cert-card h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .cert-card p{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+    .cert-link{
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      letter-spacing:.1em;color:var(--accent);text-decoration:none;
+    }
+    .cert-link:hover{text-decoration:underline}
+
+    /* ============================================================
+       CONTACT
+    ============================================================ */
+    .contact-section{
+      background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);
+    }
+    .contact-inner{
+      display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:start;
+    }
+    .contact-info p{
+      font-size:1rem;line-height:1.9;color:rgba(232,237,245,.7);margin-bottom:3rem;
+    }
+    .contact-cards{display:flex;flex-direction:column;gap:1rem}
+    .contact-card{
+      display:flex;align-items:center;gap:1.2rem;
+      padding:1.2rem 1.5rem;
+      background:rgba(0,200,180,.04);
+      border:1px solid var(--border);
+      transition:all .2s;text-decoration:none;
+    }
+    .contact-card:hover{border-color:rgba(0,200,180,.4);background:rgba(0,200,180,.08)}
+    .contact-card-icon{
+      width:42px;height:42px;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid var(--accent);color:var(--accent);font-size:1.2rem;
+    }
+    .contact-card-text h4{
+      font-family:'Space Mono',monospace;font-size:.7rem;
+      letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:.2rem;
+    }
+    .contact-card-text span{font-size:.95rem;color:var(--text)}
+
+    /* Simple form */
+    .contact-form{display:flex;flex-direction:column;gap:1rem}
+    .form-field{
+      display:flex;flex-direction:column;gap:.4rem;
+    }
+    .form-field label{
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      letter-spacing:.15em;color:var(--muted);text-transform:uppercase;
+    }
+    .form-field input,.form-field textarea{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:.85rem 1rem;
+      font-family:'DM Sans',sans-serif;font-size:.95rem;
+      outline:none;resize:none;
+      transition:border-color .2s;
+    }
+    .form-field input:focus,.form-field textarea:focus{border-color:rgba(0,200,180,.5)}
+    .form-field textarea{min-height:120px}
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer{
+      padding:2.5rem 4rem;
+      border-top:1px solid var(--border);
+      display:flex;justify-content:space-between;align-items:center;
+      font-family:'Space Mono',monospace;font-size:.68rem;
+      color:var(--muted);
+    }
+    footer a{color:var(--muted);text-decoration:none}
+    footer a:hover{color:var(--accent)}
+
+    /* ============================================================
+       DIVIDER
+    ============================================================ */
+    .divider{
+      width:100%;height:1px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      opacity:.2;margin:0;border:none;
+    }
+
+    /* ============================================================
+       FLOATING COORDS
+    ============================================================ */
+    .floating-coords{
+      position:fixed;bottom:2rem;right:2rem;
+      font-family:'Space Mono',monospace;font-size:.6rem;
+      color:rgba(0,200,180,.4);letter-spacing:.1em;
+      pointer-events:none;z-index:50;
+      text-align:right;line-height:1.6;
+    }
+
+    /* ============================================================
+       ANIMATIONS
+    ============================================================ */
+    .fade-in{
+      opacity:0;transform:translateY(20px);
+      transition:opacity .7s ease,transform .7s ease;
+    }
+    .fade-in.visible{opacity:1;transform:none}
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media(max-width:900px){
+      nav{padding:1rem 2rem}
+      .nav-links,.nav-coords{display:none}
+      .nav-toggle{display:block}
+      section{padding:5rem 2rem}
+      .hero{padding:0 2rem}
+      .hero-visual{display:none}
+      .about-grid,.contact-inner,.skills-layout{grid-template-columns:1fr}
+      .services-grid{grid-template-columns:1fr}
+      .projects-grid,.videos-grid,.certs-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:600px){
+      .projects-grid,.videos-grid,.certs-grid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
-<body>
-       <header class="l-header" id="header">
-   <nav class="nav bd-container">
-  <a href="#accueil" class="nav_logo">Erwan</a>
+<body style="background-color:var(--bg);">
 
-  <div class="nav_menu" id="nav-menu">
-    <ul class="nav_list">
-      <li class="nav_item"><a href="#accueil"   class="nav_link">Accueil</a></li>
-      <li class="nav_item"><a href="#a-propos"  class="nav_link">À propos</a></li>
-      <li class="nav_item"><a href="#services"  class="nav_link">Services</a></li>
-      <li class="nav_item"><a href="#projets"   class="nav_link">Projets</a></li>
-      <li class="nav_item"><a href="#contact"   class="nav_link">Contact</a></li>
-    </ul>
-  </div>
+<!-- CURSOR -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
 
-  <div class="nav_toggle" id="nav-toggle">
-    <i class="bx bx-menu"></i>
-  </div>
+<!-- FLOATING COORDS -->
+<div class="floating-coords" id="floating-coords">
+  43.2965° N<br>5.3698° E<br>Marseille, FR
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">ERWAN</a>
+  <ul class="nav-links">
+    <li><a href="#hero">Accueil</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#projects">Projets</a></li>
+    <li><a href="#cartes">Cartes</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-coords" id="live-time">-- : -- : --</div>
+  <button id="theme-toggle" type="button" aria-label="Basculer le thème">🌙</button>
+  <div class="nav-toggle" id="nav-toggle"><i class="bx bx-menu"></i></div>
 </nav>
 
-  </header>
-   <main class="l-main">
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section class="hero" id="hero">
 
-  <!-- HOME -->
-  <section class="home" id="Accueil">
-    <div class="home_container bd-container bd-grid">
-      <div class="home_data">
-        <span class="home_greeting">JE SUIS</span>
-        <h1 class="home_name">ERWAN N'GUESSAN</h1>
-        <p class="home_roles" aria-live="polite"><span id="typed-roles" class="typed"></span></p>
-        <span class="home_profession">Passionné par la géomatique et la télédétection, je suis actuellement à la recherche d’un stage ou d’une alternance me permettant de mettre en pratique mes compétences en analyse spatiale, traitement d’images satellites et développement d’applications cartographiques.
-Étudiant en Master Géomatique et Modélisation Spatiale à l’Université Aix-Marseille, je m’intéresse particulièrement aux applications de la télédétection pour la gestion durable des ressources naturelles, la modélisation environnementale et l’innovation géospatiale. Géomaticien / Data Analyste SIG</span>
-        <a download="" href="assets/pdf/C.V.pdf" class="button button-light">Télécharger le CV</a>
+  <!-- Topographic rings SVG -->
+  <svg class="topo-rings" viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="350" cy="350" r="320"/>
+    <circle cx="350" cy="350" r="290"/>
+    <circle cx="350" cy="350" r="260"/>
+    <circle cx="350" cy="350" r="230"/>
+    <circle cx="350" cy="350" r="200"/>
+    <circle cx="350" cy="350" r="170"/>
+    <circle cx="350" cy="350" r="140"/>
+    <circle cx="350" cy="350" r="110"/>
+    <circle cx="350" cy="350" r="80"/>
+    <circle cx="350" cy="350" r="50"/>
+    <circle cx="350" cy="350" r="25"/>
+    <!-- crosshair -->
+    <line x1="350" y1="270" x2="350" y2="430" stroke="rgba(0,200,180,.1)" stroke-width="1"/>
+    <line x1="270" y1="350" x2="430" y2="350" stroke="rgba(0,200,180,.1)" stroke-width="1"/>
+    <circle cx="350" cy="350" r="6" fill="rgba(0,200,180,.3)"/>
+    <circle cx="350" cy="350" r="2" fill="rgba(0,200,180,.8)"/>
+  </svg>
 
-      <div class="home_social">
-  <a href="https://www.linkedin.com/in/erwan-n%E2%80%99guessan-24ba5232a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app"
-     target="_blank" rel="noopener"
-     class="home-social-icon" aria-label="LinkedIn">
-    <i class="bx bxl-linkedin"></i>
-  </a>
-</div>
-
-</div>
-
-
+  <div class="hero-content">
+    <div class="hero-tag">Géomaticien &amp; Data Analyste SIG</div>
+    <h1 class="hero-name">
+      ERWAN<br>
+      <span class="line2">N'GUESSAN</span>
+    </h1>
+    <p class="hero-roles"><span id="typed-role">Géomaticien</span><span class="cursor-blink"></span></p>
+    <p class="hero-bio">
+      Passionné par la géomatique, l’analyse spatiale et la télédétection, je suis étudiant en
+      <strong>Master Géomatique et Modélisation Spatiale</strong> à Aix-Marseille.
+    Je suis actuellement stagiaire au Centre Léon Bérard (Lyon), où je travaille sur des données statistiques liées aux cancers afin d’analyser leur répartition
+    identifier des tendances et produire des visualisations claires pour l’aide à la décision.
+    J’aime transformer des données complexes en résultats lisibles, à travers des cartes, des indicateurs et des analyses reproductibles.
+    </p>
+    <div class="hero-ctas">
+      <a href="assets/pdf/C.V.pdf" download class="btn-primary-geo">
+        <i class="bx bx-download"></i> Télécharger le CV
+      </a>
+      <a href="#projects" class="btn-outline-geo">
+        <i class="bx bx-map-alt"></i> Voir les projets
+      </a>
     </div>
-  </section>
-
-<!-- ABOUT -->
-<section class="about section bd-container" id="a-propos">
-  <span class="section-subtitle">Biographie</span>
-  <h2 class="section-title">À PROPOS DE MOI</h2>
-
-  <div class="about_container">
-    <!-- Colonne gauche -->
-    <div class="about_data">
-      <p class="about_description">
-        <span>ERWAN N'GUESSAN</span>
-        Titulaire d'un Master en géographie physique,je suis actuellement à
-        Aix-Marseille Université pour renforcer mes capacités pratiques.
-        Passionné par la géomatique et la télédétection, j'ai un fort intérêt
-        pour la forêt, l’aménagement du territoire et l’urbanisme.
-      </p>
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">Domaine</th>
-      <th scope="col">Expérience</th>
-      <th scope="col"> projets</th>
-      <th scope="col">Années</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">Automatisation cartographique</th>
-      <td>2 ans</td>
-      <td>4</td>
-      <td>2019–2024</td>
-    </tr>
-    <tr>
-      <th scope="row">Web mapping</th>
-      <td>1 ans</td>
-      <td>2</td>
-      <td>2020–2024</td>
-    </tr>
-    <tr>
-      <th scope="row">Analyse de données SIG</th>
-      <td>2–3 ans</td>
-      <td>4</td>
-      <td>2022–2024</td>
-    </tr>
-  </tbody>
-</table>
-     <div class="about_table">
-        <table class="table">…</table>
-      </div>
+    <div class="hero-social">
+      <a href="https://www.linkedin.com/in/erwan-n%E2%80%99guessan-24ba5232a" target="_blank" rel="noopener" class="social-link" aria-label="LinkedIn">
+        <i class="bx bxl-linkedin"></i>
+      </a>
+      <a href="mailto:ericn4712@gmail.com" class="social-link" aria-label="Email">
+        <i class="bx bx-envelope"></i>
+      </a>
     </div>
-
-   <div class="about_container bd-grid">
-  <div class="about_data bd-grid">
-    ...
   </div>
 
-  <img src="assets/image/photo_erwan.PNG" alt="Photo de Erwan N'Guessan" class="about_img">
-</div>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <div class="hero-visual">
+    <img src="assets/image/fond_vrai.png" alt="Illustration biographie">
+  </div>
 
-</section>
-
-<!-- SERVICES -->
-<section class="services section bd-container" id="services">
-  <span class="section-subtitle">Ce que je propose</span>
-  <h2 class="section-title">SERVICES</h2>
-
-  <div class="services_container bd-grid">
-    
-    <div class="services_data">
-      <i class='bx bxl-python services_icon'></i>
-      <h3 class="services_title">Automatisation des tâches SIG</h3>
-      <p class="services_description">
-        Utilisation de la programmation Python pour automatiser les opérations SIG :
-        analyse, traitement et visualisation de données géospatiales. 
-        Amélioration de l’efficacité via la création d’outils et d’applications 
-        personnalisées répondant à des besoins SIG spécifiques.
-      </p>
-      <a href="#" class="button">En savoir plus…</a>
-    </div>
-
-    <div class="services_data">
-      <i class='bx bxl-chrome services_icon'></i>
-      <h3 class="services_title">Web Mapping</h3>
-      <p class="services_description">
-        Conception de cartes web interactives (Leaflet, Mapbox, ArcGIS JS) avec 
-        légendes dynamiques, filtres, géocodage et intégration d’API. 
-        Déploiement de plateformes multi-supports sécurisées et performantes.
-      </p>
-      <a href="#" class="button">En savoir plus…</a>
-    </div>
-
-    <div class="services_data">
-      <i class='bx bx-data services_icon'></i>
-      <h3 class="services_title">Ingénierie des données</h3>
-      <p class="services_description">
-        Création de pipelines de données SIG robustes : collecte, nettoyage, 
-        validation et transformation (ETL) de données spatiales (GeoJSON, PostGIS). 
-        Automatisation Python (Pandas, GeoPandas, FME) et exposition via API 
-        pour dashboards et applications web.
-      </p>
-      <a href="#" class="button">En savoir plus…</a>
-    </div>
-
+  <div class="scroll-hint">
+    Scroll
+    <div class="line"></div>
   </div>
 </section>
 
+<hr class="divider">
 
-<!-- PROJECTS -->
-<section class="projects section bd-container" id="projets">
-  <span class="section-subtitle">Mes projets récents</span>
-  <h2 class="section-title">PROJECTS</h2>
-
-  <!-- Filtres -->
-  <div class="project_nav">
-    <span class="project_item active_project" data-filter="all">All</span>
-    <span class="project_item" data-filter="automation">Automation</span>
-    <span class="project_item" data-filter="web-mapping">Web Mapping</span>
-    <span class="project_item" data-filter="data-engineering">Data Engineering</span>
-  </div>
-
-  <!-- Rangée horizontale -->
-  <div class="projects_row" id="projects-row">
-    
-    <!-- Marseille Cyclable -->
-    <div class="project_content web-mapping" data-category="web-mapping">
-      <a href="assets/projects/marseille-cyclable/index.html" target="_blank" rel="noopener">
-        <img src="assets/projects/marseille-cyclable/preview.png"
-             alt="Marseille Cyclable — Réseau vélo & parkings"
-             class="project_img" loading="lazy">
-      </a>
-      <div class="project_data">
-        <span class="project_subtitle">Leaflet · Turf · Chart.js</span>
-        <h3 class="project_title">Mobilité urbaine et Pistes & parkings vélo (Marseille)</h3>
+<!-- ============================================================
+     ABOUT
+============================================================ -->
+<section id="about">
+  <div class="section-label">Biographie</div>
+  <h2 class="section-title">À PROPOS <span>DE MOI</span></h2>
+  <div class="about-grid">
+    <div class="about-img-wrap fade-in">
+      <img src="assets/image/photo_erwan.PNG" alt="Erwan N'Guessan">
+      <div class="about-img-frame"></div>
+      <div class="about-img-badge">
+        <strong>5+</strong>
+        années d'expérience
       </div>
     </div>
-
-    <!-- Accès aux soins – Abidjan -->
-    <div class="project_content web-mapping" data-category="web-mapping" data-tags="leaflet,chartjs,osm,santé" data-title="Accès aux soins – Abidjan">
-      <a class="project_link" href="assets/projects/projet-sante-abidjan/index.html" target="_blank" rel="noopener">
-        <img class="project_img"
-             src="assets/projects/projet-sante-abidjan/data/preview.png"
-             alt="Dashboard Santé – Abidjan (choroplèthe + clustering)"
-             loading="lazy">
-        <div class="project_badges">
-          <span class="badge">Leaflet</span>
-          <span class="badge">Chart.js</span>
-          <span class="badge">OSM</span>
-        </div>
-        <div class="project_meta">
-          <span class="project_cat">Web Mapping</span>
-          <h3>Accès aux soins – Abidjan</h3>
-          <p>Choroplèthe par commune + clustering des établissements.</p>
-        </div>
-      </a>
-      <div class="project_actions">
-        <a class="btn btn-sm" href="assets/projects/projet-sante-abidjan/index.html" target="_blank" rel="noopener">Voir la démo</a>
-      </div>
+    <div class="about-text fade-in">
+      <p>
+        Titulaire d'un <strong>Master en géographie physique</strong>, je renforce
+        mes capacités pratiques à Aix-Marseille Université. Mes domaines de prédilection :
+        la forêt, l'aménagement du territoire et l'urbanisme durable.
+      </p>
+      <p>
+        Ma force : croiser la <strong>rigueur scientifique</strong> de la géographie physique
+        avec les outils modernes de la géomatique — Python, QGIS, Leaflet, PostGIS —
+        pour produire des analyses spatiales exploitables.
+      </p>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Domaine</th>
+            <th>Expérience</th>
+            <th>Projets</th>
+            <th>Années</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Automatisation carto.</td>
+            <td>2 ans</td>
+            <td>4</td>
+            <td>2019–2024</td>
+          </tr>
+          <tr>
+            <td>Web Mapping</td>
+            <td>1 an</td>
+            <td>2</td>
+            <td>2020–2024</td>
+          </tr>
+          <tr>
+            <td>Analyse SIG</td>
+            <td>2–3 ans</td>
+            <td>4</td>
+            <td>2022–2024</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-
-    <!-- Espaces verts – Marseille -->
-    <div class="project_content web-mapping" data-category="web-mapping">
-      <a href="assets/projects/marseille-espaces-verts/index.html" target="_blank" rel="noopener">
-        <img src="assets/projects/marseille-espaces-verts/data/preview.png"
-             alt="Espaces verts & zones protégées – Marseille"
-             class="project_img" loading="lazy">
-      </a>
-      <div class="project_data">
-        <span class="project_subtitle">Leaflet · Turf · Heatmap</span>
-        <h3 class="project_title">Espaces verts et zones protégées de Marseille</h3>
-      </div>
-    </div>
-
-   
-
-    <!-- RTM – Marseille -->
-    <div class="project_content web-mapping" data-category="web-mapping">
-      <a href="assets/projects/“Réseau de transports à Marseille (RTM)/index.html" target="_blank" rel="noopener">
-        <img src="assets/projects/“Réseau de transports à Marseille (RTM)/logo_project_rtm.png"
-             alt="Réseau de transports à Marseille (RTM)"
-             class="project_img" loading="lazy">
-      </a>
-      <div class="project_data">
-        <span class="project_subtitle">Leaflet · GTFS · GeoJSON</span>
-        <h3 class="project_title">Réseau de transports à Marseille (RTM)</h3>
-      </div>
-    </div>
-
-    <!-- Analyse spatiale & climatique – Bouches-du-Rhône -->
-    <div class="project_content data-engineering" data-category="data-engineering">
-      <a href="https://erwan336.github.io/analyse-spatiale-climatique-bouches-du-rhone/" target="_blank" rel="noopener">
-        <img src="assets/projects/logo_meteo.png"
-             alt="Analyse spatiale et climatique du département des Bouches-du-Rhône"
-             class="project_img" loading="lazy">
-      </a>
-      <div class="project_data">
-        <span class="project_subtitle">Dashboard · Météo · Analyse spatiale</span>
-        <h3 class="project_title">Analyse spatiale et climatique – Bouches-du-Rhône</h3>
-      </div>
-    </div>
-
-    <!-- 🆕 Certifications -->
-    <div class="project_content data-engineering" data-category="data-engineering" data-tags="certificats,formation">
-      <a class="project_link" href="assets/certificats/" target="_blank" rel="noopener">
-        <img class="project_img"
-             src="assets/certificats/cover-certifs.png"
-             alt="Certifications et attestations"
-             loading="lazy"
-             onerror="this.style.display='none'">
-        <div class="project_badges">
-          <span class="badge">Formation</span>
-          <span class="badge">Attestations</span>
-        </div>
-        <div class="project_meta">
-          <span class="project_cat">Portfolio</span>
-         <div class="project_actions">
-  <!-- Certificat 1 -->
-  <a class="btn btn-sm"
-     href="assets/certificats/CERTIFICAT_DE_FIN_DE_FORMATION.pdf"
-     target="_blank" rel="noopener">
-    Certificat – Fin de formation (PDF)
-  </a>
-
-  <!-- Certificat 2 -->
-  <a class="btn btn-sm btn-outline"
-     href="assets/certificats/Créer_des_cartes_pour_la_certificat.pdf"
-     target="_blank" rel="noopener">
-    Certificat – Créer des cartes (PDF)
-  </a>
-
-  <!-- Attestation -->
-  <a class="btn btn-sm btn-outline"
-     href="assets/certificats/attestation_travail.png"
-     target="_blank" rel="noopener" download>
-    Attestation de travail (PNG)
-  </a>
-</div>
-
-          <p>Attestations SIG, télédétection, data…</p>
-        </div>
-      </a>
-      <div class="project_actions">
-        <!-- Remplace par tes vrais fichiers si dispo -->
-        <a class="btn btn-sm" href="assets/certificats/Certificat_SIG.pdf" target="_blank">SIG</a>
-        <a class="btn btn-sm btn-outline" href="assets/certificats/Certificat_RemoteSensing.pdf" target="_blank">Télédétection</a>
-      </div>
-    </div>
-
-  </div><!-- /.projects_row -->
-<section class="projects section bd-container" id="cartes">
-  <span class="section-subtitle">Travaux perso</span>
-  <h2 class="section-title">Cartes réalisées</h2>
-
-  <!-- BOUTON AUTOSCROLL -->
-  <div class="d-flex justify-content-center mb-3">
-    <button id="scroll-cards" class="btn btn-primary">
-      ▶️ Faire défiler les cartes
-    </button>
-  </div>
-
-  <!-- CONTENEUR DES VIGNETTES -->
-  <div class="gallery_row" id="gallery-cartes">
-    <!-- (rempli par le script de galerie) -->
   </div>
 </section>
 
-<!-- VIDEOS -->
-<section class="projects section bd-container" id="videos">
-  <span class="section-subtitle">Démos en vidéo</span>
-  <h2 class="section-title">Projets en vidéo</h2>
+<hr class="divider">
 
-  <div class="project_container">
-    <article class="project_content">
-      <div class="project_meta">
-        <span class="project_cat">Web Mapping</span>
-        <h3>Accès aux soins – Abidjan</h3>
+<!-- ============================================================
+     SERVICES
+============================================================ -->
+<section id="services">
+  <div class="section-label">Ce que je propose</div>
+  <h2 class="section-title">MES <span>SERVICES</span></h2>
+  <div class="services-grid">
+    <div class="service-card fade-in">
+      <div class="service-num">01 /</div>
+      <i class="bx bxl-python service-icon"></i>
+      <h3>Automatisation SIG</h3>
+      <p>Scripts Python pour automatiser les opérations SIG : analyse, traitement et visualisation de données géospatiales. Outils et plugins personnalisés (QGIS, ArcPy).</p>
+      <div class="service-tags">
+        <span class="service-tag">Python</span>
+        <span class="service-tag">GeoPandas</span>
+        <span class="service-tag">QGIS</span>
+        <span class="service-tag">ArcPy</span>
+      </div>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">02 /</div>
+      <i class="bx bxl-chrome service-icon"></i>
+      <h3>Web Mapping</h3>
+      <p>Cartes web interactives (Leaflet, Mapbox, ArcGIS JS) avec légendes dynamiques, filtres, géocodage et intégration d'API. Plateformes multi-supports sécurisées.</p>
+      <div class="service-tags">
+        <span class="service-tag">Leaflet</span>
+        <span class="service-tag">Mapbox</span>
+        <span class="service-tag">Chart.js</span>
+        <span class="service-tag">Turf.js</span>
+      </div>
+    </div>
+    <div class="service-card fade-in">
+      <div class="service-num">03 /</div>
+      <i class="bx bx-data service-icon"></i>
+      <h3>Ingénierie des données</h3>
+      <p>Pipelines ETL robustes : collecte, nettoyage, validation et transformation de données spatiales (GeoJSON, PostGIS). Dashboards et API REST géospatiales.</p>
+      <div class="service-tags">
+        <span class="service-tag">Pandas</span>
+        <span class="service-tag">PostGIS</span>
+        <span class="service-tag">FME</span>
+        <span class="service-tag">GeoJSON</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================================================
+     PROJECTS
+============================================================ -->
+<section id="projects">
+  <div class="section-label">Mes projets récents</div>
+  <h2 class="section-title">PROJETS <span>WEB & SIG</span></h2>
+
+  <div class="project-filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="web-mapping">Web Mapping</button>
+    <button class="filter-btn" data-filter="data-engineering">Data Eng.</button>
+    <button class="filter-btn" data-filter="automation">Automation</button>
+  </div>
+
+  <div class="projects-grid" id="projects-grid">
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/marseille-cyclable/preview.png" alt="Marseille Cyclable" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00c8b4?text=Marseille+Cyclable'">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Leaflet · Turf · Chart.js</div>
+        <h3>Mobilité urbaine — Pistes & parkings vélo (Marseille)</h3>
+        <div class="project-links">
+          <a href="assets/projects/marseille-cyclable/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/projet-sante-abidjan/data/preview.png" alt="Santé Abidjan" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00c8b4?text=Santé+Abidjan'">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Leaflet · Chart.js · OSM</div>
+        <h3>Accès aux soins — Dashboard Abidjan</h3>
+        <div class="project-links">
+          <a href="assets/projects/projet-sante-abidjan/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/marseille-espaces-verts/data/preview.png" alt="Espaces verts Marseille" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/7ef0a0?text=Espaces+verts'">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Leaflet · Turf · Heatmap</div>
+        <h3>Espaces verts et zones protégées de Marseille</h3>
+        <div class="project-links">
+          <a href="assets/projects/marseille-espaces-verts/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/“Réseau de transports à Marseille (RTM)/logo_project_rtm.png" alt="RTM Marseille" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00aaff?text=RTM+Marseille'">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Leaflet · GTFS · GeoJSON</div>
+        <h3>Réseau de transports à Marseille (RTM)</h3>
+        <div class="project-links">
+          <a href="assets/projects/“Réseau de transports à Marseille (RTM)/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="data-engineering">
+      <div class="project-img-wrap">
+        <img src="assets/projects/logo_meteo.png" alt="Analyse climatique" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00c8b4?text=Analyse+Climatique'">
+        <div class="project-overlay"></div>
+        <span class="project-category">Data Engineering</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Dashboard · Météo · Analyse spatiale</div>
+        <h3>Analyse spatiale et climatique — Bouches-du-Rhône</h3>
+        <div class="project-links">
+          <a href="https://erwan336.github.io/analyse-spatiale-climatique-bouches-du-rhone/" target="_blank" class="project-link-btn primary">Voir en ligne</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================================================
+     MAPS GALLERY
+============================================================ -->
+<section id="cartes" class="maps-section">
+  <div class="section-label">Travaux personnels</div>
+  <h2 class="section-title">CARTES <span>RÉALISÉES</span></h2>
+
+  <div class="gallery-scroll" id="gallery-cartes"></div>
+  <div class="scroll-controls">
+    <button class="scroll-btn" id="gallery-prev"><i class="bx bx-chevron-left"></i></button>
+    <button class="scroll-btn" id="gallery-next"><i class="bx bx-chevron-right"></i></button>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================================================
+     VIDEOS
+============================================================ -->
+<section id="videos">
+  <div class="section-label">Démos en vidéo</div>
+  <h2 class="section-title">PROJETS <span>EN VIDÉO</span></h2>
+  <div class="videos-grid">
+    <div class="video-card fade-in">
+      <video controls preload="metadata">
+        <source src="assets/video/acces_sante.mp4" type="video/mp4">
+      </video>
+      <div class="video-card-body">
+        <div class="video-cat">Web Mapping</div>
+        <h3>Accès aux soins — Abidjan</h3>
         <p>Dashboard interactif : choroplèthes, clustering et analyses spatiales.</p>
       </div>
-      <video class="project_img" controls preload="metadata">
-        <source src="assets/video/acces_sante.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la lecture vidÃ©o.
+    </div>
+    <div class="video-card fade-in">
+      <video controls preload="metadata">
+        <source src="assets/video/Analyse_spatiale%20des%20transport.mp4" type="video/mp4">
       </video>
-    </article>
-
-    <article class="project_content">
-      <div class="project_meta">
-        <span class="project_cat">Web Mapping</span>
+      <div class="video-card-body">
+        <div class="video-cat">Web Mapping</div>
         <h3>Analyse spatiale des transports</h3>
         <p>Mobilité urbaine, réseaux et indicateurs spatiaux pour la décision.</p>
       </div>
-      <video class="project_img" controls preload="metadata">
-        <source src="assets/video/Analyse_spatiale%20des%20transport.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la lecture vidÃ©o.
+    </div>
+    <div class="video-card fade-in">
+      <video controls preload="metadata">
+        <source src="assets/video/RESUMER_DAHBORD_METEROLOGIQUE.mp4" type="video/mp4">
       </video>
-    </article>
-
-    <article class="project_content">
-      <div class="project_meta">
-        <span class="project_cat">Data & Dashboards</span>
+      <div class="video-card-body">
+        <div class="video-cat">Data & Dashboards</div>
         <h3>Dashboard météorologique</h3>
         <p>Résumé interactif : tendances, extrêmes et comparaisons locales.</p>
       </div>
-      <video class="project_img" controls preload="metadata">
-        <source src="assets/video/RESUMER_DAHBORD_METEROLOGIQUE.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la lecture vidÃ©o.
-      </video>
-    </article>
+    </div>
   </div>
 </section>
 
+<hr class="divider">
 
-
-<!-- SKILLS VIDEO -->
-<section class="projects section bd-container" id="skills">
-  <span class="section-subtitle">Skills</span>
-  <h2 class="section-title">Competences en video</h2>
-
-  <div class="skills_grid">
-    <article class="project_content">
-      <div class="project_meta">
-        <span class="project_cat">Formation</span>
-        <h3>Competences acquises</h3>
-        <p>SIG avance, analyse spatiale, data engineering et visualisation : structuration de donnees, cartographie thematique, indicateurs, automatisation Python et tableaux de bord interactifs appliques a des cas reels.</p>
+<!-- ============================================================
+     SKILLS
+============================================================ -->
+<section id="skills">
+  <div class="section-label">Compétences</div>
+  <h2 class="section-title">SKILLS <span>&amp; OUTILS</span></h2>
+  <div class="skills-layout">
+    <div>
+      <div class="skill-bars" id="skill-bars">
+        <div class="skill-bar-item">
+          <div class="skill-bar-label">QGIS / ArcGIS <span>90%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill" style="--w:.90"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-label">Python (GeoPandas, Rasterio) <span>80%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill" style="--w:.80"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-label">Web Mapping (Leaflet, Mapbox) <span>75%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill" style="--w:.75"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-label">Télédétection (NDVI, LST) <span>85%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill" style="--w:.85"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-label">PostGIS / SQL spatial <span>70%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill" style="--w:.70"></div></div>
+        </div>
+        <div class="skill-bar-item">
+          <div class="skill-bar-label">Data Viz (Chart.js, Matplotlib) <span>78%</span></div>
+          <div class="skill-bar-track"><div class="skill-bar-fill" style="--w:.78"></div></div>
+        </div>
       </div>
-      <video class="project_img" controls preload="metadata">
+    </div>
+    <div>
+      <video class="skill-video-wrap" style="width:100%;border:1px solid var(--border)" controls preload="metadata">
         <source src="assets/image/comp.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la lecture video.
       </video>
-    </article>
-
-    <div class="skills_visual">
-      <img src="assets/image/competences_VR.png" alt="Apercu des competences en visualisation et outils" loading="lazy">
+      <img src="assets/image/competences_VR.png" alt="Compétences" class="skills-img" style="margin-top:1.5rem" loading="lazy">
     </div>
   </div>
 </section>
 
-<!-- Modal Bootstrap pour l’aperçu plein écran -->
-<div class="modal fade" id="modalCarte" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content" style="background:#0f1220;">
-      <div class="modal-header border-0">
-        <h5 class="modal-title text-light" id="modalCarteTitle"></h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-2">
-        <img id="modalCarteImg" src="" alt="" style="width:100%;height:auto;border-radius:10px;">
-      </div>
-      <div class="modal-footer border-0">
-        <a id="modalCarteDownload" class="btn btn-primary" download>Télécharger</a>
-        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Fermer</button>
+<hr class="divider">
+
+<!-- ============================================================
+     CERTIFICATIONS
+============================================================ -->
+<section id="certifications">
+  <div class="section-label">Formation</div>
+  <h2 class="section-title">CERTIFI<span>CATIONS</span></h2>
+  <div class="certs-grid">
+    <div class="cert-card fade-in">
+      <i class="bx bx-badge-check cert-icon"></i>
+      <h3>Certificat de fin de formation</h3>
+      <p>Attestation officielle validant l'ensemble du parcours de formation en géomatique et SIG.</p>
+      <a href="assets/certificats/CERTIFICAT_DE_FIN_DE_FORMATION.pdf" target="_blank" class="cert-link">Voir le PDF →</a>
+    </div>
+    <div class="cert-card fade-in">
+      <i class="bx bx-map cert-icon"></i>
+      <h3>Créer des cartes — Certification</h3>
+      <p>Maîtrise des outils de cartographie thématique et production de cartes professionnelles.</p>
+      <a href="assets/certificats/Créer_des_cartes_pour_la_certificat.pdf" target="_blank" class="cert-link">Voir le PDF →</a>
+    </div>
+    <div class="cert-card fade-in">
+      <i class="bx bx-briefcase cert-icon"></i>
+      <h3>Attestation de travail</h3>
+      <p>Document officiel attestant d'une expérience professionnelle dans le domaine géospatial.</p>
+      <a href="assets/certificats/attestation_travail.png" target="_blank" download class="cert-link">Télécharger →</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ============================================================
+     CONTACT
+============================================================ -->
+<section id="contact" class="contact-section">
+  <div class="section-label">Restons en lien</div>
+  <h2 class="section-title">CON<span>TACT</span></h2>
+  <div class="contact-inner">
+    <div class="contact-info">
+      <p>Disponible pour un stage ou une alternance dès maintenant. N'hésitez pas à me contacter pour discuter de vos projets géomatiques.</p>
+      <div class="contact-cards">
+        <a href="mailto:ericn4712@gmail.com" class="contact-card">
+          <div class="contact-card-icon"><i class="bx bx-envelope"></i></div>
+          <div class="contact-card-text">
+            <h4>Email</h4>
+            <span>ericn4712@gmail.com</span>
+          </div>
+        </a>
+        <a href="tel:+33751159292" class="contact-card">
+          <div class="contact-card-icon"><i class="bx bx-phone"></i></div>
+          <div class="contact-card-text">
+            <h4>Téléphone</h4>
+            <span>07 51 15 92 92</span>
+          </div>
+        </a>
+        <a href="https://www.linkedin.com/in/erwan-n%E2%80%99guessan-24ba5232a" target="_blank" rel="noopener" class="contact-card">
+          <div class="contact-card-icon"><i class="bx bxl-linkedin"></i></div>
+          <div class="contact-card-text">
+            <h4>LinkedIn</h4>
+            <span>Erwan N'Guessan</span>
+          </div>
+        </a>
       </div>
     </div>
+    <form class="contact-form" action="https://formspree.io/f/xvzbydoy" method="POST">
+      <div class="form-field">
+        <label for="name">Nom complet</label>
+        <input type="text" id="name" name="name" placeholder="Votre nom" required>
+      </div>
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="votre@email.com" required>
+      </div>
+      <div class="form-field">
+        <label for="msg">Message</label>
+        <textarea id="msg" name="message" placeholder="Décrivez votre projet…" required></textarea>
+      </div>
+      <button class="btn-primary-geo" type="submit" style="align-self:flex-start">
+        <i class="bx bx-send"></i> Envoyer
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 Erwan N'Guessan — Géomaticien</span>
+  <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:rgba(0,200,180,.5)">
+    43.2965° N &nbsp;/&nbsp; 5.3698° E
+  </span>
+  <a href="https://www.linkedin.com/in/erwan-n%E2%80%99guessan-24ba5232a" target="_blank">LinkedIn</a>
+</footer>
+
+<!-- MODAL (Bootstrap-free, custom) -->
+<div id="modal-overlay" style="
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(6,11,20,.95);
+  display:none;align-items:center;justify-content:center;padding:2rem;
+">
+  <div style="max-width:900px;width:100%;position:relative">
+    <button id="modal-close" style="
+      position:absolute;top:-2.5rem;right:0;
+      background:none;border:1px solid var(--border);color:var(--muted);
+      font-size:.8rem;font-family:'Space Mono',monospace;
+      padding:.3rem .8rem;cursor:pointer;
+    ">[ Fermer ]</button>
+    <img id="modal-img" src="" alt="" style="width:100%;border:1px solid var(--border)">
+    <div id="modal-title" style="
+      font-family:'Space Mono',monospace;font-size:.7rem;
+      color:var(--muted);margin-top:.7rem;
+    "></div>
   </div>
 </div>
 
-
-
-
-
-</section>
-
-
-</main>
-
-  <script src="assets/js/main.js"></script>
-  <!-- Bootstrap JS pour le modal (à mettre AVANT le script de galerie) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-<!-- Script GALERIE : charge les PNG de assets/cartes/ et fabrique les tuiles -->
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
 <script>
-(function(){
-  // Dossier des cartes
-  const BASE = "assets/cartes/";
+/* --- Cursor --- */
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  ring.style.left=rx-18+'px';ring.style.top=ry-18+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button,.project-card,.map-card,.service-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='scale(2.5)';ring.style.transform='scale(1.5)'});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';ring.style.transform='scale(1)'});
+});
 
-  // Liste des fichiers (noms EXACTS depuis ton dossier)
-    const FILES = [
+/* --- Live clock --- */
+function updateClock(){
+  const n=new Date();
+  const t=[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>String(x).padStart(2,'0')).join(' : ');
+  document.getElementById('live-time').textContent=t;
+}
+setInterval(updateClock,1000);updateClock();
+
+/* --- Typed roles --- */
+const roles=['Géomaticien','Data Analyste SIG','Cartographe','Télédétecteur','Web Mapper'];
+let ri=0,ci=0,deleting=false;
+function typeRole(){
+  const el=document.getElementById('typed-role');
+  const word=roles[ri];
+  if(!deleting){
+    el.textContent=word.slice(0,++ci);
+    if(ci===word.length){setTimeout(()=>{deleting=true},1600);setTimeout(typeRole,80);return;}
+  }else{
+    el.textContent=word.slice(0,--ci);
+    if(ci===0){deleting=false;ri=(ri+1)%roles.length;}
+  }
+  setTimeout(typeRole,deleting?50:90);
+}
+typeRole();
+
+/* --- Fade-in on scroll --- */
+const faders=document.querySelectorAll('.fade-in');
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:.1});
+faders.forEach(f=>io.observe(f));
+
+/* --- Skill bars animation --- */
+const skillBars=document.querySelectorAll('.skill-bar-fill');
+const sb=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const el=e.target;
+      const w=parseFloat(el.style.getPropertyValue('--w')||0);
+      el.style.transform=`scaleX(${w})`;
+      el.classList.add('animate');
+      sb.unobserve(el);
+    }
+  });
+},{threshold:.4});
+skillBars.forEach(b=>{b.style.transformOrigin='left';sb.observe(b)});
+
+/* --- Project filter --- */
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+    const f=this.dataset.filter;
+    document.querySelectorAll('#projects-grid .project-card').forEach(c=>{
+      c.style.display=(f==='all'||c.dataset.cat===f)?'':'none';
+    });
+  });
+});
+
+/* --- Gallery build --- */
+const BASE="assets/cartes/";
+const FILES=[
   "carte de localisation lyon et fond.png",
   "carte de localisation yamal.png",
   "carte de relation NDVI_TPS_NDBI.png",
@@ -456,143 +1350,96 @@
   "yamal_site de travaille.png",
   "zones_fortement_urbanise.png"
 ];
-
-
-  function titleFromFile(name){
-    return name.replace(/\.[^.]+$/,'')
-               .replace(/[_\-]+/g,' ')
-               .replace(/\s+/g,' ')
-               .replace(/\b\w/g, m => m.toUpperCase());
-  }
-  function urlFor(name){
-    return BASE + encodeURIComponent(name).replace(/%2F/g,'/');
-  }
-
-  const row = document.getElementById("gallery-cartes");
-  if(!row) return;
-
-  const fr = document.createDocumentFragment();
+const gallery=document.getElementById('gallery-cartes');
+if(gallery){
   FILES.forEach(name=>{
-    const src = urlFor(name);
-    const title = titleFromFile(name);
-    const card = document.createElement('div');
-    card.className = 'carte_card';
-    card.innerHTML = `
-      <img src="${src}" alt="${title}" loading="lazy" onerror="this.style.display='none'">
-      <div class="carte_body">
-        <h3 class="carte_title">${title}</h3>
-        <p style="opacity:.85;margin:0;">PNG – ${name}</p>
-      </div>
-      <div class="carte_actions">
-        <button class="btn btn-primary btn-sm" data-view="${src}" data-title="${title}">Voir en grand</button>
-        <a class="btn btn-outline-light btn-sm" href="${src}" download>Télécharger</a>
+    const src=BASE+encodeURIComponent(name).replace(/%2F/g,'/');
+    const title=name.replace(/\.[^.]+$/,'').replace(/[_\-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+    const card=document.createElement('div');
+    card.className='map-card';
+    card.innerHTML=`
+      <img src="${src}" alt="${title}" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <div class="map-card-body">
+        <h4>${title}</h4>
+        <p>PNG · ${name.split('.')[0]}</p>
       </div>
     `;
-    fr.appendChild(card);
+    card.addEventListener('click',()=>openModal(src,title));
+    gallery.appendChild(card);
   });
-  row.appendChild(fr);
+}
 
-  // Modal Bootstrap
-  const modalEl = document.getElementById('modalCarte');
-  let modal = null;
-  if (modalEl && window.bootstrap) modal = new bootstrap.Modal(modalEl);
+/* Gallery scroll controls */
+const gPrev=document.getElementById('gallery-prev');
+const gNext=document.getElementById('gallery-next');
+if(gPrev&&gNext&&gallery){
+  gNext.onclick=()=>gallery.scrollBy({left:300,behavior:'smooth'});
+  gPrev.onclick=()=>gallery.scrollBy({left:-300,behavior:'smooth'});
+}
 
-  row.addEventListener('click', (e)=>{
-    const btn = e.target.closest('button[data-view]');
-    if(!btn) return;
-    const src = btn.getAttribute('data-view');
-    const title = btn.getAttribute('data-title');
-    const img = document.getElementById('modalCarteImg');
-    const ttl = document.getElementById('modalCarteTitle');
-    const dl  = document.getElementById('modalCarteDownload');
-    if (img) img.src = src;
-    if (ttl) ttl.textContent = title;
-    if (dl)  dl.href = src;
-    if (modal) modal.show(); else window.open(src, '_blank');
+/* --- Modal --- */
+const overlay=document.getElementById('modal-overlay');
+const modalImg=document.getElementById('modal-img');
+const modalTitle=document.getElementById('modal-title');
+const modalClose=document.getElementById('modal-close');
+function openModal(src,title){
+  modalImg.src=src;modalTitle.textContent=title;
+  overlay.style.display='flex';document.body.style.overflow='hidden';
+}
+if(modalClose) modalClose.onclick=closeModal;
+if(overlay) overlay.addEventListener('click',e=>{if(e.target===overlay)closeModal()});
+function closeModal(){overlay.style.display='none';document.body.style.overflow='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+/* --- Theme toggle --- */
+const themeToggle=document.getElementById('theme-toggle');
+function applyTheme(mode){
+  const isLight=mode==='light';
+  document.body.classList.toggle('light',isLight);
+  if(themeToggle) themeToggle.textContent=isLight?'☀️':'🌙';
+  try{localStorage.setItem('theme',mode);}catch(e){}
+}
+function autoTheme(){
+  const h=new Date().getHours();
+  return (h>=7 && h<19)?'light':'dark';
+}
+const savedTheme=(()=>{try{return localStorage.getItem('theme');}catch(e){return null;}})();
+applyTheme(savedTheme || autoTheme());
+if(themeToggle){
+  themeToggle.addEventListener('click',()=>{
+    const next=document.body.classList.contains('light')?'dark':'light';
+    applyTheme(next);
   });
-})();
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const row = document.getElementById('gallery-cartes');
-  const btn = document.getElementById('scroll-cards');
+}
 
-  if (!row || !btn) {
-    console.warn('[AutoScroll] Conteneur ou bouton introuvable', { row: !!row, btn: !!btn });
-    return;
-  }
+/* --- Mobile nav toggle --- */
+const toggle=document.getElementById('nav-toggle');
+const navMenu=document.querySelector('.nav-links');
+if(toggle&&navMenu){
+  toggle.addEventListener('click',()=>{
+    navMenu.style.display=navMenu.style.display==='flex'?'none':'flex';
+    navMenu.style.flexDirection='column';
+    navMenu.style.position='fixed';
+    navMenu.style.top='60px';
+    navMenu.style.left='0';navMenu.style.right='0';
+    navMenu.style.background='rgba(6,11,20,.97)';
+    navMenu.style.padding='2rem';
+    navMenu.style.borderBottom='1px solid rgba(0,200,180,.15)';
+  });
+}
 
-  // Sécurité : on force l’horizontal (au cas où une classe wrap traîne)
-  row.classList.remove('wrap');
-
-  let scrolling = false;
-  let timer = null;
-
-  function step() {
-    // si rien à défiler, on stoppe
-    if (row.scrollWidth <= row.clientWidth) {
-      stop();
-      return;
-    }
-    // avancer
-    row.scrollBy({ left: 400, behavior: 'smooth' });
-    // boucler en fin
-    const nearEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 6;
-    if (nearEnd) row.scrollTo({ left: 0, behavior: 'smooth' });
-  }
-
-  function start() {
-    if (scrolling) return;
-    scrolling = true;
-    btn.textContent = '⏸️ Stopper le défilement';
-    step(); // premier pas immédiat
-    timer = setInterval(step, 1800); // pas toutes les 1.8s
-  }
-
-  function stop() {
-    scrolling = false;
-    btn.textContent = '▶️ Faire défiler les cartes';
-    if (timer) { clearInterval(timer); timer = null; }
-  }
-
-  btn.addEventListener('click', () => (scrolling ? stop() : start()));
-
-  // DEBUG (facultatif) : voir les tailles dans la console
-  console.log('[AutoScroll] width', { scrollWidth: row.scrollWidth, clientWidth: row.clientWidth });
+/* --- Nav active link on scroll --- */
+const sections=document.querySelectorAll('section[id]');
+const links=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120)cur=s.id});
+  links.forEach(l=>{
+    l.style.color=l.getAttribute('href')==='#'+cur?'var(--accent)':'';
+  });
 });
 </script>
 
-<!-- CONTACT -->
-<section class="contact section bd-container" id="contact">
-  <span class="section-subtitle">Restons en lien</span>
-  <h2 class="section-title">Contact</h2>
-
-  <div class="contact_grid">
-    <div class="contact_card">
-      <i class='bx bx-envelope contact_icon'></i>
-      <h3>Email</h3>
-      <a href="mailto:ericn4712@gmail.com">ericn4712@gmail.com</a>
-    </div>
-
-    <div class="contact_card">
-      <i class='bx bx-phone contact_icon'></i>
-      <h3>Téléphone</h3>
-      <a href="tel:+33610574937">07 51 15 99 99</a>
-    </div>
-
-    <div class="contact_card">
-      <i class='bx bxl-linkedin contact_icon'></i>
-      <h3>LinkedIn</h3>
-      <a href="https://www.linkedin.com/in/erwan-n%E2%80%99guessan-24ba5232a" target="_blank" rel="noopener">
-        Erwan-n’guessan
-      </a>
-    </div>
-  </div>
-</section>
-
-  
 </body>
-</html>  
-
-
+</html>
 

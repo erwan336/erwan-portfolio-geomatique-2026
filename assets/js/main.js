@@ -260,7 +260,7 @@
     // Hero paragraph
     const heroDesc = document.querySelector('.home_profession');
     if (heroDesc) {
-      heroDesc.textContent = "Passionné par la géomatique, l’analyse spatiale et la data, je suis étudiant en Master Géomatique et Modélisation Spatiale à l’Université Aix-Marseille et stagiaire au Centre Léon Bérard (Lyon) en tant que Geo Data Analyst. Mes missions portent sur l’étude de la distribution spatio-temporelle de certains cancers et l’exploration de pistes explicatives à travers des méthodes SIG et statistiques : structuration et analyse de données, cartographie, indicateurs, et tableaux de bord interactifs. Mon objectif est de transformer des données complexes en informations lisibles et actionnables, au service de la compréhension des maladies et de l’aide à la décision.";
+      heroDesc.textContent = "Passionné par la géomatique, l’analyse spatiale et la télédétection, je suis étudiant en Master 2 Géomatique et Modélisation Spatiale. Je suis actuellement stagiaire au Centre Léon Bérard (Lyon), où je travaille sur des données statistiques liées aux cancers afin d’analyser leur répartition, identifier des tendances et produire des visualisations claires pour l’aide à la décision. J’aime transformer des données complexes en résultats lisibles, à travers des cartes, des indicateurs et des analyses reproductibles.";
     }
 
     // About paragraph

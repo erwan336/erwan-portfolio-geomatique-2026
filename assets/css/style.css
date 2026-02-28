@@ -787,25 +787,9 @@ body{ font-family: var(--body-font); }
   border-radius: 16px;
 }
 
-/* Force le fond de page en blanc */
+/* Fond global plus clair */
 html, body {
-  background-color: #ffffff !important;
-}
-
-/* Si certaines sections ont un fond sombre */
-.section, section, .about, .projects, .services, .container-fluid {
-  background-color: #ffffff !important;
-}
-
-/* Si tu utilises des classes Bootstrap sombres */
-.bg-dark, .bg-black, .dark-bg {
-  background-color: #ffffff !important;
-}
-
-/* Si un overlay assombrit les côtés */
-section::before, section::after,
-.hero::before, .hero::after {
-  background: transparent !important;
+  background-color: #fafbfd !important;
 }
 .project_content { position:relative; border-radius:16px; overflow:hidden; background:#151629; color:#e6f0ff; box-shadow:0 8px 24px rgba(0,0,0,.15); }
 .project_content .project_img { width:100%; height:190px; object-fit:cover; display:block; transition:transform .4s ease; }
