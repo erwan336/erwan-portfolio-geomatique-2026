@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Réseau de transports à Marseille (RTM) — Analyse par arrondissement</title>
+
+  <!-- Leaflet & plugins -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- Turf.js pour filtrer les arrêts dans un polygone -->
+  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+  <!-- Chart.js pour le graphique des modes -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+  <link rel="stylesheet" href="./web/style.css" />
+</head>
+<body>
+  <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-expanded="true" aria-controls="sidebar">
+    Tableau de bord
+  </button>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+  <aside class="sidebar" id="sidebar">
+    <h1 class="brand">RTM — Analyse par arrondissement</h1>
+    <div class="partner-logos">
+      <button type="button" class="partner-logo-btn" data-logo-src="./assets/image/logo.png" data-logo-alt="Logo du projet">
+        <img src="./assets/image/logo.png" alt="Logo du projet" class="partner-logo" loading="lazy">
+      </button>
+      <button type="button" class="partner-logo-btn" data-logo-src="./assets/image/logo_rtm.png" data-logo-alt="Logo RTM">
+        <img src="./assets/image/logo_rtm.png" alt="Logo RTM" class="partner-logo" loading="lazy">
+      </button>
+      <button type="button" class="partner-logo-btn" data-logo-src="./assets/image/logo_amu.png" data-logo-alt="Logo Aix-Marseille Université">
+        <img src="./assets/image/logo_amu.png" alt="Logo Aix-Marseille Université" class="partner-logo" loading="lazy">
+      </button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+        <label for="arrSelect" style="margin:0">Analyse par arrondissement</label>
+        <!-- Commutateur Mode comparaison (off par défaut) -->
+        <div class="switch" title="Activer le mode comparaison (sélection multiple)">
+          <input type="checkbox" id="chk-compare">
+          <label for="chk-compare">Mode comparaison</label>
+        </div>
+      </div>
+      <!-- Sélecteur (mono par défaut, basculé en multiple quand le switch est on) -->
+      <!-- Multi-sélecteur pour comparaison -->
+      <select id="arrSelect" size="6" style="width:100%"></select>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button id="btn-city" class="btn">Stats ville entière</button>
+        <button id="btn-clear-compare" class="btn">Réinitialiser la comparaison</button>
+      </div>
+      <!-- Boutons existants de contrôle des points -->
+      <!-- Remplacement: boutons de contrôle des points -->
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+        <button id="btn-toggle-cluster" class="btn" title="Basculer entre clusters et points simples">Désactiver le clustering</button>
+        <button id="btn-smaller-points" class="btn" title="Réduire/Restaurer la taille des points">Réduire la taille des points</button>
+        <!-- Nouveaux boutons: choroplèthe et hexagones -->
+        <button id="btn-toggle-choropleth" class="btn" title="Afficher/Masquer la couche choroplèthe">Activer le choroplèthe</button>
+        <button id="btn-toggle-hexbin" class="btn" title="Afficher/Masquer la grille d'hexagones">Afficher les hexagones</button>
+      </div>
+      <div class="mode-filter">
+        <p>Filtrer les arrêts par mode</p>
+        <div class="mode-filter__buttons">
+          <button type="button" id="filter-bus" class="btn mode-filter-btn mode-filter-btn--bus is-active" aria-pressed="true">Bus</button>
+          <button type="button" id="filter-tram" class="btn mode-filter-btn mode-filter-btn--tram is-active" aria-pressed="true">Tram</button>
+          <button type="button" id="filter-metro" class="btn mode-filter-btn mode-filter-btn--metro is-active" aria-pressed="true">Métro</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card kpis">
+      <div class="kpi">
+        <span>Total d’arrêts</span>
+        <b id="kpi-total" class="kpi-value">0</b>
+      </div>
+      <div class="kpi">
+        <span>Densité (arrêts/km²)</span>
+        <b id="kpi-densite" class="kpi-value">—</b>
+      </div>
+      <div class="kpi">
+        <span>Indice de desserte</span>
+        <b id="kpi-indice" class="kpi-value">—</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Arrêts par mode</h2>
+      <canvas id="modeBar"></canvas>
+      <div class="mode-legend">
+        <span><i class="mode-dot" style="background:#e74c3c;"></i>Métro</span>
+        <span><i class="mode-dot" style="background:#3498db;"></i>Tram</span>
+        <span><i class="mode-dot" style="background:#2ecc71;"></i>Bus</span>
+        <span><i class="mode-dot" style="background:#bdc3c7;"></i>Autre</span>
+      </div>
+    </div>
+
+    <!-- Bloc comparaison -->
+    <div class="card">
+      <h2>Comparaison</h2>
+      <div style="font-size:12px; color:#64748b; margin-bottom:8px;">Sélectionnez un ou plusieurs arrondissements pour comparer.</div>
+      <canvas id="cmpModes" style="margin-bottom:12px;"></canvas>
+      <canvas id="cmpIndicators"></canvas>
+      <div id="cmp-ranks" style="font-size:12px; color:#475569; margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Légende <span id="lg-source">Arrondissements</span></h2>
+      <div class="legend">
+        <div class="gradient" id="lg-gradient"></div>
+        <div class="scale" id="lg-ticks">
+          <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+        </div>
+      </div>
+      <small>Plus desservi → Moins desservi</small>
+    </div>
+
+    <footer class="foot">
+      Données: RTM (GTFS) + OSM. Fonctionne en local.
+    </footer>
+  </aside>
+  <div id="resize-handle" class="resize-handle" aria-hidden="true"></div>
+
+  <main class="main">
+    <div id="map"></div>
+  </main>
+
+  <div id="logo-modal" class="logo-modal" aria-hidden="true">
+    <div class="logo-modal__backdrop" data-logo-close></div>
+    <div class="logo-modal__dialog" role="dialog" aria-modal="true" aria-label="Agrandissement du logo">
+      <button type="button" class="logo-modal__close" id="logo-modal-close" aria-label="Fermer l’aperçu du logo">&times;</button>
+      <img id="logo-modal-img" src="" alt="Logo agrandi" />
+    </div>
+  </div>
+
+  <!-- Script principal avec hexbin sécurisé -->
+  <script src="./web/app.js"></script>
+</body>
+</html>

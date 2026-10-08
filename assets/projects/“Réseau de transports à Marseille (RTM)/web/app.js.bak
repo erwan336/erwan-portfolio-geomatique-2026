@@ -1,0 +1,292 @@
+﻿/* eslint-env browser */
+/* global L, turf, Chart, ChartDataLabels */
+
+/************ CONFIG ************/
+const PATH_STOPS = "/assets/data/rtm_stops.geojson";
+const PATH_BOUND = "/assets/data/Marseille.geojson";
+const PATH_ARR   = "/assets/data/arrondissement.geojson";
+
+const MODE_COLOR = { metro: "#e11d48", tram: "#06b6d4", bus: "#22c55e", ferry: "#f59e0b" };
+
+/************ ETAT GLOBAL ************/
+let ALL_FEATURES = [];
+let POINTS_IN_CITY = [];
+let MARSEILLE_POLY = null;
+let ARR_GEO = null;
+let arrLayer = null;
+let arrStats = [];
+let arrModeStats = [];
+let marseilleBounds = null;
+let charts = { modePie:null, modeBar:null, arrModeBar:null };
+
+// UI state
+let activeModes = new Set(["metro","tram","bus","ferry"]);
+let showPoints = true;
+let useCluster = true;
+let showHex = false;
+let samplePct = 100;
+let pointSize = 6;
+let hexAuto = true;
+let hexManualM = 800;
+
+/************ CARTE ************/
+const map = L.map('map').setView([43.2965, 5.37], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(map);
+
+const clusters = L.markerClusterGroup({ disableClusteringAtZoom: 16 }).addTo(map);
+const layerPoints = L.layerGroup();
+const layerHex = L.layerGroup();
+let hexLegend = null;
+let arrLegend = null;
+
+// Limite Marseille
+const boundaryGroup = L.layerGroup().addTo(map);
+map.createPane('boundaryPane');
+map.getPane('boundaryPane').style.zIndex = 650;
+
+fetch(PATH_BOUND)
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(raw => {
+    const fc = (raw.type === "FeatureCollection") ? raw : { type:"FeatureCollection", features:[raw] };
+    MARSEILLE_POLY = fc.features[0];
+    const halo   = L.geoJSON(fc, { pane:'boundaryPane', style:{ color:'#ff0000', weight:8, opacity:.35, fill:false } });
+    const stroke = L.geoJSON(fc, { pane:'boundaryPane', style:{ color:'#ff0000', weight:2.5, opacity:1,  fill:false } });
+    boundaryGroup.addLayer(halo);
+    boundaryGroup.addLayer(stroke);
+    marseilleBounds = stroke.getBounds();
+    map.fitBounds(marseilleBounds, { padding:[20,20] });
+    if (ALL_FEATURES.length) renderAll();
+  })
+  .catch(err => console.warn('Limite Marseille absente:', err));
+
+// Arrondissements
+fetch(PATH_ARR)
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(geo => {
+    ARR_GEO = geo;
+    arrLayer = L.geoJSON(geo, {
+      style: { color:'#111827', weight:1, fillOpacity:0.15 },
+      onEachFeature: (f, layer) => {
+        const nm = f.properties.name || f.properties.nom || 'Arrondissement';
+        layer.bindPopup(`<b>${nm}</b>`);
+      }
+    }).addTo(map);
+    if (POINTS_IN_CITY.length) updateArrondissementsStats(POINTS_IN_CITY);
+  })
+  .catch(() => console.warn('PATH_ARR introuvable ou invalide:', PATH_ARR));
+
+// Stops
+fetch(PATH_STOPS)
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(g => { ALL_FEATURES = g.features || []; renderAll(); })
+  .catch(err => { console.error('Chargement stops KO:', err); alert('Impossible de charger rtm_stops.geojson.'); });
+
+/************ UTILS ************/
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function lerp(a,b,t){ return a + (b-a)*t; }
+function hexToRgb(hex){ const n = parseInt(hex.replace('#',''),16); return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 }; }
+function rgbToHex(r,g,b){ const to = (x)=>x.toString(16).padStart(2,'0'); return `#${to(r)}${to(g)}${to(b)}`; }
+function mix(c1,c2,t){ const a=hexToRgb(c1), b=hexToRgb(c2); return rgbToHex(Math.round(lerp(a.r,b.r,t)), Math.round(lerp(a.g,b.g,t)), Math.round(lerp(a.b,b.b,t))); }
+const RAMP_COLORS = ['#0ea5e9','#22c55e','#f59e0b','#ef4444'];
+function rampColor(t){
+  t = clamp(t,0,1);
+  const seg = 1/(RAMP_COLORS.length-1);
+  const i = Math.min(RAMP_COLORS.length-2, Math.floor(t/seg));
+  const tt = (t - i*seg)/seg;
+  return mix(RAMP_COLORS[i], RAMP_COLORS[i+1], tt);
+}
+function rampGradientCss(){
+  const stops = [0,25,50,75,100].map(p=>({p, c:rampColor(p/100)}));
+  return `linear-gradient(90deg, ${stops.map(s=>`${s.c} ${s.p}%`).join(',')})`;
+}
+function sizeFromZoom(z){
+  // de ~1600m (zoom 10) à ~200m (zoom 16)
+  const sz = 200 * Math.pow(2, clamp(14 - z, -2, 3));
+  return clamp(Math.round(sz/100)*100, 200, 1600);
+}
+function currentHexSizeM(){ return hexAuto ? sizeFromZoom(map.getZoom()) : hexManualM; }
+
+/************ LOGIQUE ************/
+function currentPointGroup(){ return useCluster ? clusters : layerPoints; }
+
+function computeCitySubset(){
+  let featsRaw = ALL_FEATURES;
+  try {
+    if (MARSEILLE_POLY && MARSEILLE_POLY.geometry && (MARSEILLE_POLY.geometry.type === 'Polygon' || MARSEILLE_POLY.geometry.type === 'MultiPolygon')) {
+      const ptsFC = turf.featureCollection(ALL_FEATURES.map(f => turf.point(f.geometry.coordinates, f.properties)));
+      const inside = turf.pointsWithinPolygon(ptsFC, MARSEILLE_POLY);
+      POINTS_IN_CITY = inside.features;
+      featsRaw = POINTS_IN_CITY;
+    } else {
+      POINTS_IN_CITY = ALL_FEATURES;
+    }
+  } catch(e){
+    console.warn('Erreur filtrage commune:', e);
+    POINTS_IN_CITY = ALL_FEATURES;
+  }
+  return featsRaw.filter(f => f && f.geometry && f.geometry.type==='Point' && Array.isArray(f.geometry.coordinates) && f.geometry.coordinates.length===2);
+}
+
+function applyFilters(feats){
+  let out = feats.filter(f => activeModes.has((f.properties && f.properties.main_mode) || 'bus'));
+  if (samplePct < 100) {
+    const keep = Math.max(1, Math.round(out.length * (samplePct/100)));
+    for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [out[i], out[j]] = [out[j], out[i]]; }
+    out = out.slice(0, keep);
+  }
+  return out;
+}
+
+function renderPoints(feats){
+  clusters.clearLayers();
+  layerPoints.clearLayers();
+  const grp = currentPointGroup();
+  feats.forEach(f=>{
+    const [lon, lat] = f.geometry.coordinates;
+    const mode = (f.properties && f.properties.main_mode) || 'bus';
+    const color = MODE_COLOR[mode] || '#22c55e';
+    const m = L.circleMarker([lat, lon], { radius: pointSize, color, fillColor: color, fillOpacity: .7, weight: 1 })
+      .bindPopup(`<b>${(f.properties && f.properties.stop_name) || 'Arrêt'}</b><br>${mode}`);
+    grp.addLayer(m);
+  });
+  if (showPoints) {
+    if (useCluster) { if (!map.hasLayer(clusters)) clusters.addTo(map); if (map.hasLayer(layerPoints)) map.removeLayer(layerPoints); }
+    else { if (!map.hasLayer(layerPoints)) layerPoints.addTo(map); if (map.hasLayer(clusters)) map.removeLayer(clusters); }
+  } else {
+    if (map.hasLayer(layerPoints)) map.removeLayer(layerPoints);
+    if (map.hasLayer(clusters)) map.removeLayer(clusters);
+  }
+}
+
+function buildHexLayer(feats){
+  layerHex.clearLayers();
+  if (!showHex || !MARSEILLE_POLY) return;
+  try {
+    const bbox = turf.bbox(MARSEILLE_POLY);
+    const curSize = currentHexSizeM();
+    const grid = turf.hexGrid(bbox, curSize/1000, { units:'kilometers' });
+    const ptsFC = turf.featureCollection(feats.map(f=>turf.point(f.geometry.coordinates)));
+    grid.features.forEach(cell=>{ cell.properties.count = turf.pointsWithinPolygon(ptsFC, cell).features.length; });
+    const vals = grid.features.map(c=>c.properties.count);
+    const min = Math.min(...vals);
+    const max = Math.max(1, ...vals);
+    const hexLayer = L.geoJSON(grid, { style:(f)=>{ const v=f.properties.count||0; const t=(v-min)/(max-min||1); return { color:'#111827', weight:1, fillColor:rampColor(t), fillOpacity: 0.3 + 0.5*t }; }});
+    layerHex.addLayer(hexLayer).addTo(map);
+    if (!hexLegend) { hexLegend = L.control({position:'bottomright'}); hexLegend.onAdd = function(){ const d=L.DomUtil.create('div','legend leaflet-control legend'); d.innerHTML = `<div class="title">Densité (hex)</div><div class="grad"></div><div class="scale"><span class="min">0</span><span class="max">0</span></div>`; this._div=d; return d; }; hexLegend.addTo(map); }
+    if (hexLegend && hexLegend._div){ const grad = hexLegend._div.querySelector('.grad'); grad.style.background = rampGradientCss(); hexLegend._div.querySelector('.min').textContent = String(min); hexLegend._div.querySelector('.max').textContent = String(max); }
+  } catch(e){ console.warn('Hex layer error:', e); }
+}
+
+function updateKPIsAndCharts(feats){
+  const total = feats.length; const byMode = { metro:0, tram:0, bus:0, ferry:0 };
+  feats.forEach(f=>{ const m=(f.properties&&f.properties.main_mode)||'bus'; if(byMode[m]==null) byMode[m]=0; byMode[m]++; });
+  const setText = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=String(v); };
+  setText('kpi-total', total); setText('kpi-metro', byMode.metro||0); setText('kpi-tram', byMode.tram||0); setText('kpi-bus', byMode.bus||0); setText('kpi-ferry', byMode.ferry||0);
+
+  const pieCtx = document.getElementById('modePie');
+  if (pieCtx) {
+    const data = { labels:Object.keys(byMode), datasets:[{ data:Object.values(byMode), backgroundColor:[MODE_COLOR.metro,MODE_COLOR.tram,MODE_COLOR.bus,MODE_COLOR.ferry] }] };
+    if (charts.modePie) { charts.modePie.data = data; charts.modePie.update(); }
+    else charts.modePie = new Chart(pieCtx, { type:'pie', data, options:{ plugins:{ legend:{ position:'bottom' }, datalabels:{ color:'#e2e8f0' } } } });
+  }
+
+  const list = (arrStats||[]).slice().sort((a,b)=>b.count-a.count).slice(0,12);
+  const barCtx = document.getElementById('modeBar');
+  if (barCtx) {
+    const data = { labels:list.map(d=>d.name), datasets:[{ label:'Arrêts', data:list.map(d=>d.count), backgroundColor:'#60a5fa' }] };
+    if (charts.modeBar) { charts.modeBar.data = data; charts.modeBar.update(); }
+    else charts.modeBar = new Chart(barCtx, { type:'bar', data, options:{ plugins:{ legend:{ display:false }, datalabels:{ anchor:'end', align:'top', color:'#cbd5e1' } }, scales:{ y:{ beginAtZero:true } } } });
+  }
+
+  // Stacked bar: arrêts par mode et arrondissement (Top 10)
+  const arrTop = (arrModeStats||[]).slice().sort((a,b)=>b.total-a.total).slice(0,10);
+  const arrLabels = arrTop.map(d=>d.name);
+  const stackModes = ['metro','tram','bus','ferry'];
+  const stackDatasets = stackModes.map(m=>({ label:m, data: arrTop.map(d=> (d.byMode[m]||0) ), backgroundColor: MODE_COLOR[m] }));
+  const stackedCtx = document.getElementById('arrModeBar');
+  if (stackedCtx){
+    const sdata = { labels: arrLabels, datasets: stackDatasets };
+    const opts = { plugins:{ legend:{ position:'bottom' } }, scales:{ x:{ stacked:true }, y:{ stacked:true, beginAtZero:true } } };
+    if (charts.arrModeBar){ charts.arrModeBar.data = sdata; charts.arrModeBar.options = opts; charts.arrModeBar.update(); }
+    else { charts.arrModeBar = new Chart(stackedCtx, { type:'bar', data:sdata, options:opts }); }
+  }
+}
+
+function updateArrondissementsStats(feats){
+  if (!ARR_GEO || !arrLayer) return;
+  const ptsFC = turf.featureCollection(feats.map(f=>turf.point(f.geometry.coordinates, f.properties)));
+  arrStats = [];
+  arrModeStats = [];
+  ARR_GEO.features.forEach(f=>{
+    const nm = f.properties.name || f.properties.nom || 'Arrondissement';
+    const inside = turf.pointsWithinPolygon(ptsFC, f);
+    const byMode = { metro:0, tram:0, bus:0, ferry:0 };
+    inside.features.forEach(pt=>{ const m=(pt.properties && pt.properties.main_mode)||'bus'; if(byMode[m]==null) byMode[m]=0; byMode[m]++; });
+    const total = inside.features.length;
+    arrStats.push({ name:nm, count: total });
+    arrModeStats.push({ name:nm, total, byMode });
+  });
+
+  const listDiv = document.getElementById('arr-list');
+  if (listDiv) listDiv.innerHTML = arrModeStats.slice().sort((a,b)=>b.total-a.total).map(d=>`<div><b>${d.name}</b> — ${d.total} arrêts <span style="color:#94a3b8">(M:${d.byMode.metro}, T:${d.byMode.tram}, B:${d.byMode.bus}, F:${d.byMode.ferry})</span></div>`).join('');
+
+  // Choroplèthe continue + légende
+  const vals = arrStats.map(d=>d.count); const min = Math.min(...vals), max = Math.max(...vals)||1;
+  arrLayer.eachLayer(layer=>{
+    const f = layer.feature; const nm = f.properties.name || f.properties.nom || 'Arrondissement';
+    const rec = arrStats.find(x=>x.name===nm); const t = rec ? (rec.count - min)/(max-min||1) : 0;
+    const fillColor = rampColor(t);
+    layer.setStyle({ fillColor, fillOpacity:0.5, color:'#111827', weight:1 });
+  });
+  if (!arrLegend){ arrLegend = L.control({position:'bottomleft'}); arrLegend.onAdd = function(){ const d=L.DomUtil.create('div','legend leaflet-control legend'); d.innerHTML = `<div class="title">Arrêts / arrondissement</div><div class="grad"></div><div class="scale"><span class="min">0</span><span class="max">0</span></div>`; this._div=d; return d; }; arrLegend.addTo(map); }
+  if (arrLegend && arrLegend._div){ const grad = arrLegend._div.querySelector('.grad'); grad.style.background = rampGradientCss(); arrLegend._div.querySelector('.min').textContent = String(min); arrLegend._div.querySelector('.max').textContent = String(max); }
+}
+
+function renderAll(){
+  const city = computeCitySubset();
+  const feats = applyFilters(city);
+  renderPoints(feats);
+  updateArrondissementsStats(feats);
+  updateKPIsAndCharts(feats);
+  buildHexLayer(feats);
+}
+
+/************ UI ************/
+window.addEventListener('DOMContentLoaded', ()=>{
+  if (typeof Chart !== 'undefined' && ChartDataLabels && typeof Chart.register === 'function') {
+    Chart.register(ChartDataLabels);
+  }
+  const $ = (s)=>document.querySelector(s);
+  const on = (s,ev,fn)=>{ const el=$(s); if(el) el.addEventListener(ev,fn); };
+
+  on('#chk-boundary','change', e=>{ if(e.target.checked) boundaryGroup.addTo(map); else map.removeLayer(boundaryGroup); });
+  on('#chk-points','change', e=>{ showPoints = e.target.checked; renderAll(); });
+  on('#chk-cluster','change', e=>{ useCluster = e.target.checked; renderAll(); });
+  on('#chk-hex','change', e=>{ showHex = e.target.checked; renderAll(); });
+  on('#chk-hex-auto','change', e=>{ hexAuto = e.target.checked; const slider=document.getElementById('rng-hex'); if (slider) slider.disabled = hexAuto; renderAll(); });
+  on('#rng-hex','input', e=>{ hexManualM = Number(e.target.value)||800; const lbl=document.getElementById('lbl-hex'); if (lbl) lbl.textContent = String(hexManualM); if (!hexAuto) renderAll(); });
+  on('#rng-size','input', e=>{ pointSize = Number(e.target.value)||6; const lbl=document.getElementById('lbl-size'); if (lbl) lbl.textContent=String(pointSize); renderAll(); });
+  on('#rng-sample','input', e=>{ samplePct = Number(e.target.value)||100; const lbl=document.getElementById('lbl-sample'); if (lbl) lbl.textContent=String(samplePct); renderAll(); });
+  on('#rng-width','input', e=>{ const v=Number(e.target.value)||420; document.documentElement.style.setProperty('--sidebar', `${v}px`); const lbl=document.getElementById('lbl-width'); if (lbl) lbl.textContent=String(v); });
+  on('#btn-fit','click', ()=>{ if (marseilleBounds) map.fitBounds(marseilleBounds, { padding:[20,20] }); });
+
+  document.querySelectorAll('input[type="checkbox"][data-mode]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{ const m=chk.getAttribute('data-mode'); if(chk.checked) activeModes.add(m); else activeModes.delete(m); renderAll(); });
+  });
+
+  // Affichage choroplèthe arrondissements (on/off)
+  on('#chk-arr-choropleth','change', e=>{
+    const on = !!e.target.checked;
+    if (on) {
+      if (arrLayer && !map.hasLayer(arrLayer)) arrLayer.addTo(map);
+      if (arrLegend && arrLegend.addTo) arrLegend.addTo(map);
+      renderAll();
+    } else {
+      if (arrLayer && map.hasLayer(arrLayer)) map.removeLayer(arrLayer);
+      if (arrLegend && arrLegend.remove) arrLegend.remove();
+    }
+  });
+
+  map.on('zoomend', ()=>{ if (hexAuto && showHex) renderAll(); });
+});
+

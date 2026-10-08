@@ -1,0 +1,123 @@
+﻿:root{
+  --sidebar: 440px;
+  --bg: #ffffff;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --card: #f8fafc;
+  --border: #e2e8f0;
+  --primary: #2563eb;
+  --sidebar-min: 320px;
+  --sidebar-max: 600px;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--fg); background:var(--bg); display:flex}
+
+.sidebar{width:var(--sidebar); padding:18px; border-right:1px solid var(--border); overflow:auto; opacity:0; transform:translateX(-14px); transition:opacity .35s ease, transform .35s ease}
+.sidebar.is-ready{opacity:1; transform:translateX(0)}
+.resize-handle{width:6px; background:rgba(15,23,42,.08); cursor:col-resize; flex-shrink:0; align-self:stretch; transition:background .2s ease}
+.resize-handle:hover,.resize-handle:focus-visible{background:rgba(15,23,42,.18)}
+.resize-handle:focus-visible{outline:2px solid #2563eb; outline-offset:-2px}
+.sidebar-toggle{position:fixed; top:16px; left:16px; z-index:980; border:none; padding:10px 16px; border-radius:999px; background:#0f172a; color:#fff; font-weight:600; cursor:pointer; box-shadow:0 8px 24px rgba(15,23,42,.25); transition:transform .2s ease, box-shadow .2s ease, background .2s ease}
+.sidebar-toggle:hover{transform:translateY(-1px); box-shadow:0 12px 28px rgba(15,23,42,.3); background:#111b37}
+.sidebar-toggle:active{transform:scale(.98)}
+.sidebar-toggle:focus-visible{outline:2px solid #93c5fd; outline-offset:3px}
+@media (min-width: 901px){
+  .sidebar-toggle{display:none}
+}
+.sidebar-backdrop{display:none}
+.brand{font-size:18px; margin:0 0 12px 0}
+.main{flex:1; position:relative}
+#map{position:absolute; inset:0}
+
+.card{background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; margin:12px 0; box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{font-size:14px; margin:0 0 8px 0}
+
+.kpis{display:grid; grid-template-columns:repeat(2, 1fr); gap:10px}
+.kpi{display:flex; justify-content:space-between; align-items:center; padding:12px; background:#fff; border:1px solid var(--border); border-radius:8px}
+.kpi span{color:var(--muted)}
+.kpi b{font-size:20px}
+
+.partner-logos{display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:8px}
+.partner-logo-btn{border:none; background:transparent; padding:0; cursor:pointer; border-radius:10px; transition:transform .2s ease, box-shadow .2s ease}
+.partner-logo-btn:focus-visible{outline:2px solid #2563eb; outline-offset:4px}
+.partner-logo{height:44px; max-width:140px; object-fit:contain; background:#fff; border:1px solid var(--border); border-radius:8px; padding:4px; box-shadow:0 1px 2px rgba(15,23,42,.15); transition:transform .2s ease, box-shadow .2s ease}
+.partner-logo-btn:hover .partner-logo, .partner-logo-btn:focus-visible .partner-logo{transform:scale(1.05); box-shadow:0 6px 18px rgba(15,23,42,.25)}
+
+.btn{appearance:none; border:1px solid var(--border); background:#fff; color:var(--fg); padding:8px 10px; border-radius:6px; cursor:pointer; transition:all .2s ease}
+.btn:hover{border-color:#cbd5e1; background:#f8fafc; transform:translateY(-1px); box-shadow:0 6px 16px rgba(15,23,42,.08)}
+.btn:active{transform:translateY(0)}
+.btn:focus-visible{outline:2px solid #2563eb; outline-offset:2px}
+
+.mode-filter{margin-top:12px}
+.mode-filter p{margin:0 0 6px 0; font-size:13px; color:var(--muted)}
+.mode-filter__buttons{display:flex; gap:8px; flex-wrap:wrap}
+.mode-filter-btn{flex:1; min-width:80px; transition:all .2s ease}
+.mode-filter-btn.is-active{color:#fff}
+.mode-filter-btn--bus.is-active{background:#1f8b3b; border-color:#1f8b3b}
+.mode-filter-btn--tram.is-active{background:#1d6ddc; border-color:#1d6ddc}
+.mode-filter-btn--metro.is-active{background:#c0392b; border-color:#c0392b}
+.mode-filter-btn:not(.is-active):hover{color:#0f172a; background:#e2f3e9}
+
+select{width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:#fff}
+
+.kpi-value{display:inline-block; transition:opacity .25s ease, transform .25s ease}
+.kpi-value.is-animating{animation:kpiPulse .28s ease}
+@keyframes kpiPulse{
+  0%{opacity:0; transform:scale(.97)}
+  100%{opacity:1; transform:scale(1)}
+}
+
+.legend{display:none}
+.legend + small{display:none}
+.legend.is-visible{display:block}
+.legend.is-visible + small{display:block}
+.legend .gradient{height:12px; border-radius:6px; background:linear-gradient(90deg,#0b3d1b,#14652b,#1f8b3b,#2fbf4f,#3efc66); border:1px solid var(--border)}
+.legend .scale{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:4px}
+
+.mode-legend{display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--muted); margin-top:8px}
+.mode-legend span{display:flex; align-items:center; gap:6px}
+.mode-dot{width:12px; height:12px; border-radius:999px; border:1px solid rgba(15,23,42,.2); display:inline-block}
+
+.leaflet-marker-icon.rtm-cluster-icon{background:transparent; border:none}
+.rtm-cluster-icon div{width:40px; height:40px; border-radius:50%; background:rgba(15,23,42,.9); color:#fff; display:flex; align-items:center; justify-content:center; border:4px solid #bdc3c7; box-shadow:0 2px 6px rgba(15,23,42,.35); font-weight:600}
+.rtm-cluster-icon span{line-height:1}
+
+body.modal-open{overflow:hidden}
+.logo-modal{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(15,23,42,.55); opacity:0; visibility:hidden; pointer-events:none; transition:opacity .25s ease, visibility .25s ease; z-index:999}
+.logo-modal.is-open{opacity:1; visibility:visible; pointer-events:auto}
+.logo-modal__backdrop{position:absolute; inset:0}
+.logo-modal__dialog{position:relative; background:#fff; border-radius:16px; padding:16px; max-width:80vw; max-height:80vh; box-shadow:0 25px 45px rgba(15,23,42,.35); transform:scale(.9); transition:transform .25s ease}
+.logo-modal.is-open .logo-modal__dialog{transform:scale(1)}
+.logo-modal__close{position:absolute; top:8px; right:8px; border:none; background:rgba(15,23,42,.08); border-radius:999px; width:32px; height:32px; font-size:20px; cursor:pointer}
+.logo-modal__close:hover{background:rgba(15,23,42,.15)}
+#logo-modal-img{max-width:70vw; max-height:70vh; display:block}
+
+.comparison-animate{animation:fadeSlide .4s ease}
+@keyframes fadeSlide{
+  0%{opacity:0; transform:translateY(4px)}
+  100%{opacity:1; transform:translateY(0)}
+}
+
+/* Ajout: style simple du commutateur clustering */
+.switch{display:flex; align-items:center; gap:8px; margin-top:8px}
+.switch input[type="checkbox"]{cursor:pointer}
+.switch label{cursor:pointer}
+.switch input[type="checkbox"]{width:18px; height:18px}
+.switch label{color:var(--fg)}
+
+@media (max-width: 1100px){
+  .sidebar{width:320px; padding:14px}
+  :root{ --sidebar: 320px; }
+}
+
+@media (max-width: 900px){
+  .sidebar{position:fixed; left:0; top:0; bottom:0; width:min(420px, 88vw); max-width:100%; border-right:none; border-radius:0; box-shadow:0 25px 60px rgba(15,23,42,.35); transform:translateX(-110%); opacity:1; transition:transform .35s ease; padding:20px 18px 28px; z-index:940; background:var(--bg)}
+  .sidebar.is-ready{transform:translateX(-110%)}
+  body.sidebar-open .sidebar.is-ready{transform:translateX(0)}
+  .resize-handle{display:none}
+  .sidebar-backdrop{display:block; position:fixed; inset:0; background:rgba(15,23,42,.35); z-index:930; opacity:0; pointer-events:none; transition:opacity .3s ease}
+  body.sidebar-open .sidebar-backdrop{opacity:1; pointer-events:auto}
+  body.sidebar-open{overflow:hidden}
+  .main{flex:1}
+}
