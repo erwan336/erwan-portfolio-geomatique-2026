@@ -1,11 +1,35 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Erwan N'Guessan — Géomaticien & Data Analyste SIG</title>
+  <title>Erwan N'Guessan — Géomaticien et Data Analyste SIG</title>
+  <meta name="description" content="Portfolio d'Erwan N'Guessan, géomaticien et data analyste SIG : web mapping, analyse spatiale, santé et télédétection.">
+  <meta name="theme-color" content="#0b1424">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Erwan N'Guessan — Géomaticien et Data Analyste SIG">
+  <meta property="og:description" content="Web mapping, analyse spatiale, santé et télédétection — projets, cartes et démos vidéo.">
+  <meta property="og:url" content="https://erwan336.github.io/erwan-portfolio-geomatique-2026/">
+  <meta property="og:image" content="https://erwan336.github.io/erwan-portfolio-geomatique-2026/assets/image/og-preview.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://erwan336.github.io/erwan-portfolio-geomatique-2026/assets/image/og-preview.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://server.arcgisonline.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/vendor/uicons/regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="assets/vendor/uicons/thin-straight/css/uicons-thin-straight.css">
+  <link rel="stylesheet" href="assets/vendor/uicons/bold-straight/css/uicons-bold-straight.css">
+  <link rel="stylesheet" href="assets/vendor/uicons/regular-straight/css/uicons-regular-straight.css">
+  <link rel="stylesheet" href="assets/vendor/uicons/bold-rounded/css/uicons-bold-rounded.css">
+  <link rel="stylesheet" href="assets/vendor/uicons/thin-rounded/css/uicons-thin-rounded.css">
+  <link rel="stylesheet" href="assets/vendor/uicons/solid-rounded/css/uicons-solid-rounded.css">
+  <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+  <script src="assets/vendor/leaflet/leaflet.js"></script>
 
   <style>
     /* ============================================================
@@ -34,7 +58,7 @@
       --grid:      rgba(0,150,130,.08);
     }
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    html{scroll-behavior:smooth;font-size:16px}
+    html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
     body{
       background:var(--bg);
       color:var(--text);
@@ -51,14 +75,15 @@
        CUSTOM CURSOR
     ============================================================ */
     .cursor{
-      position:fixed;width:10px;height:10px;
+      position:fixed;width:14px;height:14px;
       background:var(--accent);border-radius:50%;
       pointer-events:none;z-index:9999;
       transition:transform .1s ease;
       mix-blend-mode:screen;
+      box-shadow:0 0 12px rgba(0,200,180,.8);
     }
     .cursor-ring{
-      position:fixed;width:36px;height:36px;
+      position:fixed;width:44px;height:44px;
       border:1px solid rgba(0,200,180,.5);border-radius:50%;
       pointer-events:none;z-index:9998;
       transition:all .18s ease;
@@ -145,7 +170,7 @@
       position:relative;
       min-height:100vh;
       display:flex;align-items:center;
-      padding:0 4rem;
+      padding:5rem 4rem 2rem;   /* 5rem top = compense la nav fixe */
       overflow:hidden;
     }
     /* Topographic rings */
@@ -161,19 +186,112 @@
     }
     .topo-rings circle:nth-child(even){stroke:rgba(0,170,255,.04)}
 
-    .hero-content{position:relative;z-index:2;max-width:700px}
+    .hero-content{position:relative;z-index:2;max-width:700px;flex:1 1 auto;min-width:0}
+    /* colonne : vidéo + hint */
+    .hero-vi-col{
+      margin-left:auto;flex-shrink:0;
+      display:flex;flex-direction:column;align-items:center;gap:.5rem;
+    }
     .hero-visual{
-      margin-left:auto;
-      width:min(1000px,64vw);
-      aspect-ratio: 4 / 3;
-      border:1px solid rgba(0,200,180,.25);
+      flex-shrink:0;
+      width:min(560px,40vw);
+      aspect-ratio:4/3;
+      border:1px solid rgba(0,200,180,.35);
       border-radius:18px;
       padding:0;
       background:rgba(7,18,32,.35);
-      box-shadow:0 14px 40px rgba(0,0,0,.35);
+      box-shadow:0 14px 40px rgba(0,0,0,.35),0 0 30px rgba(0,200,180,.3);
       z-index:2;
       overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
     }
+    /* wrapper vidéo hero */
+    .hero-vi-wrap{
+      position:relative;width:100%;height:100%;
+      flex-shrink:0;
+      border-radius:12px;overflow:hidden;
+    }
+    .hero-visual-img{
+      width:100%;height:100%;
+      object-fit:cover;display:block;
+      user-select:none;-webkit-user-drag:none;pointer-events:none;
+    }
+    /* bouton mute dans la nav */
+    #nav-mute-btn{
+      width:44px;height:44px;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:transparent;
+      border:1px solid var(--border);border-radius:4px;
+      color:var(--muted);cursor:pointer;font-size:1rem;
+      margin-left:.3rem;transition:all .2s;
+    }
+    #nav-mute-btn:hover{color:var(--accent);border-color:var(--accent)}
+    /* hint son — sous la vidéo, permanent */
+    #hero-sound-hint{
+      font-family:'Space Mono',monospace;font-size:.6rem;
+      letter-spacing:.1em;color:rgba(0,200,180,.75);
+      text-align:center;pointer-events:none;
+    }
+    #hero-map{
+      display:none;
+    }
+    /* overlay bords sombres */
+    .hero-visual::before{
+      content:'';
+      position:absolute;inset:0;z-index:10;
+      border-radius:12px;
+      background:
+        radial-gradient(ellipse at center, transparent 55%, rgba(6,11,20,.65) 100%);
+      pointer-events:none;
+    }
+    /* scan line */
+    .hero-visual::after{
+      content:'';
+      position:absolute;left:0;right:0;
+      height:2px;z-index:11;
+      background:linear-gradient(90deg,transparent,rgba(0,200,180,.6),transparent);
+      animation:scanLine 4s linear infinite;
+      pointer-events:none;
+      border-radius:0;
+    }
+    @keyframes scanLine{
+      0%  {top:0%;opacity:0}
+      5%  {opacity:1}
+      95% {opacity:1}
+      100%{top:100%;opacity:0}
+    }
+    /* coordonnées coin bas-gauche */
+    .map-coords-overlay{
+      position:absolute;bottom:.7rem;left:.9rem;
+      font-family:'Space Mono',monospace;font-size:.58rem;
+      letter-spacing:.1em;color:rgba(0,200,180,.75);
+      z-index:12;pointer-events:none;
+      text-shadow:0 0 8px rgba(0,200,180,.5);
+    }
+    /* marker pulsant */
+    @keyframes markerPulse{
+      0%  {transform:scale(1);  opacity:.8}
+      70% {transform:scale(2.8);opacity:0}
+      100%{transform:scale(1);  opacity:0}
+    }
+    /* popup dark */
+    .leaflet-popup-content-wrapper{
+      background:#0e1a2e!important;
+      border:1px solid rgba(0,200,180,.35)!important;
+      border-radius:4px!important;
+      color:#e8edf5!important;
+      box-shadow:0 4px 20px rgba(0,0,0,.6)!important;
+    }
+    .leaflet-popup-tip{background:#0e1a2e!important}
+    #parcours-map{background:#1e1e1e}
+    #parcours-map .leaflet-control-attribution{background:rgba(10,17,32,.7);color:#7a8ca8;font-size:9px}
+    .parcours-line{animation:parcoursDash 1.2s linear infinite}
+    @keyframes parcoursDash{to{stroke-dashoffset:-14}}
+    @media (prefers-reduced-motion:reduce){.parcours-line{animation:none}}
+    .leaflet-popup-content{margin:.6rem .9rem!important;font-size:.75rem!important}
     .hero-visual img{
       width:100%;
       height:100%;
@@ -193,10 +311,11 @@
     .hero-tag::before{content:'◈ '}
     h1.hero-name{
       font-family:'Syne',sans-serif;
-      font-size:clamp(3rem,6vw,5.5rem);
+      font-size:clamp(2rem,4.5vw,5.5rem);
       font-weight:800;line-height:.95;
       letter-spacing:-.02em;
       margin-bottom:1rem;
+      white-space:nowrap;
     }
     .hero-name .line2{
       -webkit-text-stroke:1px var(--accent);
@@ -217,11 +336,36 @@
     }
     @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
     .hero-bio{
-      font-size:1rem;line-height:1.8;
+      font-size:1.05rem;line-height:2;
       color:rgba(232,237,245,.7);
       max-width:560px;margin-bottom:2.5rem;
-      border-left:2px solid var(--accent);
-      padding-left:1.2rem;
+      border-left:3px solid var(--accent);
+      padding-left:1.8rem;
+      animation:borderPulse 2s ease-in-out infinite;
+    }
+    @keyframes borderPulse{
+      0%,100%{border-left-color:rgba(0,200,180,.6)}
+      50%    {border-left-color:rgba(0,200,180,1)}
+    }
+    .bio-phrase{
+      display:block;
+      opacity:0;transform:translateY(15px);
+      transition:opacity .8s ease,transform .8s ease;
+    }
+    .bio-phrase.visible{opacity:1;transform:translateY(0)}
+    .bio-highlight{color:var(--accent);font-weight:600}
+    .bio-badge{
+      display:inline-block;
+      color:var(--accent);
+      background:rgba(0,200,180,.12);
+      border:1px solid rgba(0,200,180,.35);
+      padding:.05rem .45rem;
+      border-radius:3px;
+      animation:badgeBlink 2s ease-in-out infinite;
+    }
+    @keyframes badgeBlink{
+      0%,100%{background:rgba(0,200,180,.12);border-color:rgba(0,200,180,.35)}
+      50%    {background:rgba(0,200,180,.22);border-color:rgba(0,200,180,.7)}
     }
     body.light .hero-bio,
     body.light .about-text p,
@@ -236,6 +380,15 @@
     body.light .project-overlay{
       background:linear-gradient(to top, rgba(240,244,248,.97) 0%, transparent 60%);
     }
+    body.light .cursor{background:#007a6e;mix-blend-mode:normal;box-shadow:0 0 10px rgba(0,120,110,.8)}
+    body.light .cursor-ring{border-color:rgba(0,120,110,.7);box-shadow:0 0 8px rgba(0,120,110,.4)}
+    body.light .tl-year{color:#007a6e;font-weight:700}
+    body.light .tl-label{color:#0e1a2e}
+    body.light .tl-dot{border-color:#007a6e;background:#e2eaf4}
+    body.light .tl-item:hover .tl-dot{background:#007a6e}
+    body.light .timeline::before{background:linear-gradient(to bottom,#007a6e,rgba(0,120,110,.15))}
+    body.light .tl-item.tl-current .tl-dot{background:#007a6e}
+    body.light .tl-item.tl-current .tl-label{color:#007a6e}
     .hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem}
     .btn-primary-geo{
       display:inline-flex;align-items:center;gap:.6rem;
@@ -314,8 +467,25 @@
       font-weight:800;line-height:1;
       letter-spacing:-.02em;
       margin-bottom:4rem;
+      text-shadow:
+        0 0 10px rgba(0,200,180,.3),
+        0 0 20px rgba(0,200,180,.2),
+        0 0 40px rgba(0,200,180,.1);
+      animation:neonPulse 2s ease-in-out infinite;
+    }
+    h2.section-title:hover{
+      text-shadow:
+        0 0 10px rgba(0,200,180,.8),
+        0 0 20px rgba(0,200,180,.6),
+        0 0 40px rgba(0,200,180,.4),
+        0 0 80px rgba(0,200,180,.2);
+    }
+    @keyframes neonPulse{
+      0%,100%{text-shadow:0 0 10px rgba(0,200,180,.3)}
+      50%    {text-shadow:0 0 20px rgba(0,200,180,.6),0 0 40px rgba(0,200,180,.3)}
     }
     h2.section-title span{color:var(--accent)}
+    h2.section-title i{color:var(--accent);margin-right:.4em;font-size:.85em;vertical-align:middle}
 
     /* ============================================================
        ABOUT
@@ -425,7 +595,7 @@
     .project-filters{
       display:flex;gap:0;margin-bottom:3rem;
       border:1px solid var(--border);
-      width:fit-content;
+      width:fit-content;max-width:100%;flex-wrap:wrap;
     }
     .filter-btn{
       font-family:'Space Mono',monospace;font-size:.7rem;
@@ -454,6 +624,7 @@
     .project-img-wrap{
       position:relative;overflow:hidden;
       aspect-ratio:16/10;
+      background:var(--bg3);
     }
     .project-img-wrap img{
       width:100%;height:100%;object-fit:cover;
@@ -515,7 +686,7 @@
       transition:all .3s;cursor:pointer;
     }
     .map-card:hover{border-color:rgba(0,200,180,.5);transform:translateY(-4px)}
-    .map-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+    .map-card img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;display:block}
     .map-card-body{padding:1rem}
     .map-card-body h4{
       font-family:'Space Mono',monospace;font-size:.72rem;
@@ -524,6 +695,12 @@
     .map-card-body p{
       font-size:.7rem;color:var(--muted);
       font-family:'Space Mono',monospace;
+    }
+    .map-card-tags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.65rem}
+    .map-card-tag{
+      font-family:'Space Mono',monospace;font-size:.58rem;
+      letter-spacing:.07em;padding:.2rem .5rem;
+      border:1px solid var(--border);color:var(--accent);
     }
     .scroll-controls{
       display:flex;gap:.5rem;margin-top:1.5rem;
@@ -557,6 +734,106 @@
       font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.5rem;
     }
     .video-card-body p{font-size:.85rem;color:var(--muted);line-height:1.6}
+
+    /* --- Bandeau chiffres clés --- */
+    .kpi-band{
+      position:relative;z-index:1;
+      display:grid;grid-template-columns:repeat(4,1fr);
+      margin:0 4rem 1rem;border:1px solid var(--border);background:var(--bg2);
+    }
+    .kpi{
+      padding:1.8rem 1.2rem;text-align:center;
+      border-right:1px solid var(--border);position:relative;
+    }
+    .kpi:last-child{border-right:none}
+    .kpi::before{
+      content:'';position:absolute;top:-1px;left:50%;width:0;height:2px;
+      background:var(--accent);transform:translateX(-50%);transition:width .8s ease;
+    }
+    .kpi-band.visible .kpi::before{width:40%}
+    .kpi-num{
+      display:block;font-family:'Syne',sans-serif;font-weight:800;
+      font-size:clamp(1.8rem,3.2vw,2.8rem);line-height:1;color:var(--accent);
+      text-shadow:0 0 18px rgba(0,200,180,.35);font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;
+    }
+    .kpi-label{
+      display:block;margin-top:.6rem;font-family:'Space Mono',monospace;
+      font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+    }
+    @media(max-width:900px){
+      .kpi-band{grid-template-columns:repeat(2,1fr);margin:0 1.5rem 1rem}
+      .kpi:nth-child(2){border-right:none}
+      .kpi:nth-child(-n+2){border-bottom:1px solid var(--border)}
+    }
+    @media(max-width:600px){
+      .kpi-band{margin:0 1rem 1rem}
+      .kpi{padding:1.3rem .6rem}
+      .kpi-label{font-size:.55rem;letter-spacing:.08em}
+    }
+
+    /* --- Formulaire : message de statut --- */
+    .form-status{
+      display:none;align-items:center;gap:.6rem;margin-top:.2rem;
+      font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.06em;
+      padding:.8rem 1rem;border:1px solid var(--border);
+    }
+    .form-status.show{display:flex;animation:statusIn .4s ease}
+    .form-status.ok{color:var(--accent);border-color:rgba(0,200,180,.45);background:rgba(0,200,180,.08)}
+    .form-status.err{color:#ff6b6b;border-color:rgba(255,107,107,.45);background:rgba(255,107,107,.08)}
+    @keyframes statusIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .contact-form button[disabled]{opacity:.6;cursor:wait}
+
+    /* --- Carte vidéo mise en avant (motion design EEPATHO) --- */
+    @property --vf-angle{syntax:'<angle>';inherits:false;initial-value:0deg}
+    .video-card.video-featured{
+      position:relative;overflow:hidden;
+      border:1px solid transparent;
+      background:
+        linear-gradient(var(--bg2),var(--bg2)) padding-box,
+        conic-gradient(from var(--vf-angle),#00c8b4,#00aaff,#a78bfa,#ff6b9d,#00c8b4) border-box;
+      box-shadow:0 10px 40px rgba(0,200,180,.22);
+      animation:vfSpin 6s linear infinite,vfGlow 3s ease-in-out infinite;
+    }
+    .video-card.video-featured:hover{transform:translateY(-6px);box-shadow:0 0 0 1px rgba(0,200,180,.3),0 16px 50px rgba(0,200,180,.35)}
+    @keyframes vfSpin{to{--vf-angle:360deg}}
+    @keyframes vfGlow{
+      0%,100%{box-shadow:0 10px 36px rgba(0,200,180,.20),0 0 0 rgba(167,139,250,0)}
+      50%{box-shadow:0 12px 48px rgba(0,200,180,.38),0 0 26px rgba(167,139,250,.28)}
+    }
+    .video-featured .vf-media{position:relative;overflow:hidden}
+    .video-featured .vf-badge{
+      position:absolute;top:.75rem;left:.75rem;z-index:3;pointer-events:none;
+      display:inline-flex;align-items:center;gap:.4rem;
+      font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;
+      letter-spacing:.14em;text-transform:uppercase;color:#06111e;
+      padding:.35rem .7rem;border-radius:999px;
+      background:linear-gradient(90deg,#00c8b4,#00aaff);
+      box-shadow:0 4px 16px rgba(0,200,180,.45);
+    }
+    .video-featured .vf-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#06111e;animation:pulse 1.6s ease-in-out infinite}
+    .video-featured .vf-play{
+      position:absolute;inset:0;z-index:2;margin:auto;width:64px;height:64px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(0,200,180,.9);color:#06111e;font-size:1.6rem;border:none;cursor:pointer;
+      box-shadow:0 0 0 0 rgba(0,200,180,.6);animation:vfPulse 2s ease-out infinite;
+      transition:opacity .3s,transform .2s;
+    }
+    .video-featured .vf-play:hover{transform:scale(1.08)}
+    .video-featured .vf-play[hidden]{display:none}
+    @keyframes vfPulse{0%{box-shadow:0 0 0 0 rgba(0,200,180,.6)}100%{box-shadow:0 0 0 22px rgba(0,200,180,0)}}
+    .video-featured .video-cat{display:flex;align-items:center;gap:.5rem}
+    .video-featured .video-card-body h3{
+      background:linear-gradient(90deg,var(--text),#00c8b4);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .video-featured .vf-meta{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.7rem}
+    .video-featured .vf-meta span{
+      font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.06em;
+      padding:.2rem .5rem;border:1px solid rgba(0,200,180,.35);color:var(--accent);
+    }
+    @media (prefers-reduced-motion:reduce){
+      .video-card.video-featured,.video-featured .vf-play,.video-featured .vf-badge::before{animation:none}
+    }
 
     /* ============================================================
        SKILLS
@@ -694,6 +971,91 @@
     }
 
     /* ============================================================
+       TRANSITION TREE SCREEN
+    ============================================================ */
+    #ts-screen{
+      position:fixed;inset:0;z-index:99998;
+      background:linear-gradient(135deg,#2f3257 0%,#3a1d2b 100%);
+      opacity:0;pointer-events:none;
+      transition:opacity .7s ease;
+      overflow:hidden;
+      cursor:default;
+    }
+    #ts-screen *{cursor:default}
+    #ts-screen.visible{opacity:1;pointer-events:all}
+    #ts-screen.hide{opacity:0;pointer-events:none}
+    #ts-tree-container{position:absolute;inset:0}
+    #ts-tree-container canvas{width:100%!important;height:100%!important}
+    #ts-left{
+      position:absolute;left:4vw;top:50%;transform:translateY(-50%);
+      z-index:2;pointer-events:none;
+      max-width:44vw;
+    }
+    #ts-right{
+      position:absolute;right:4vw;top:50%;transform:translateY(-50%);
+      z-index:2;pointer-events:none;text-align:right;
+      max-width:44vw;
+    }
+    #ts-skill-label,#ts-skill-label-r{
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      letter-spacing:.3em;color:rgba(255,180,140,.6);
+      text-transform:uppercase;margin-bottom:.5rem;
+      opacity:0;transition:opacity .35s;
+    }
+    #ts-skill-name{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:clamp(2rem,5vw,4.5rem);
+      color:#fff;line-height:1;white-space:nowrap;
+      text-shadow:0 0 60px rgba(255,150,100,.4);
+      opacity:0;transform:translateX(-25px);
+      transition:opacity .45s ease,transform .45s ease;
+    }
+    #ts-skill-name.show{opacity:1;transform:translateX(0)}
+    #ts-skill-name-r{
+      font-family:'Syne',sans-serif;font-weight:800;
+      font-size:clamp(2rem,5vw,4.5rem);
+      color:#e8d0ff;line-height:1;white-space:nowrap;
+      text-shadow:0 0 60px rgba(180,130,255,.4);
+      opacity:0;transform:translateX(25px);
+      transition:opacity .45s ease,transform .45s ease;
+    }
+    #ts-skill-name-r.show{opacity:1;transform:translateX(0)}
+    #ts-skill-label.show,#ts-skill-label-r.show{opacity:1}
+    #ts-btn{
+      position:absolute;bottom:8%;left:50%;transform:translateX(-50%);
+      z-index:3;
+      font-family:'Space Mono',monospace;font-size:.85rem;
+      letter-spacing:.3em;text-transform:uppercase;
+      padding:.9rem 3rem;
+      background:rgba(255,150,100,.15);
+      border:1.5px solid rgba(255,150,100,.6);
+      color:#ffd0a0;cursor:pointer;
+      opacity:0;pointer-events:none;
+      transition:all .3s;
+    }
+    #ts-btn.visible{
+      opacity:1;pointer-events:all;
+      animation:tsBlink 1.2s ease-in-out infinite;
+    }
+    #ts-btn:hover{background:rgba(255,150,100,.35);color:#fff}
+    @keyframes tsBlink{
+      0%,100%{box-shadow:0 0 10px rgba(255,150,100,.3)}
+      50%{box-shadow:0 0 30px rgba(255,150,100,.7);border-color:rgba(255,150,100,1)}
+    }
+
+    /* ============================================================
+       READ PROGRESS BAR
+    ============================================================ */
+    #read-progress{
+      position:fixed;top:0;left:0;
+      width:0%;height:3px;
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      z-index:9999;
+      transition:width .1s linear;
+      pointer-events:none;
+    }
+
+    /* ============================================================
        FLOATING COORDS
     ============================================================ */
     .floating-coords{
@@ -703,6 +1065,179 @@
       pointer-events:none;z-index:50;
       text-align:right;line-height:1.6;
     }
+
+    /* ============================================================
+       LOADER
+    ============================================================ */
+    #loader{
+      position:fixed;inset:0;z-index:99999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:2rem;cursor:pointer;
+      transition:opacity 1s ease;
+      animation:loaderBg 10s ease-in-out infinite;
+    }
+    @keyframes loaderBg{
+      0%  {background:radial-gradient(ellipse at 50% 50%,#0d1635 0%,#020510 100%)}
+      20% {background:radial-gradient(ellipse at 40% 60%,#12083a 0%,#020510 100%)}
+      40% {background:radial-gradient(ellipse at 60% 40%,#041e2a 0%,#020510 100%)}
+      60% {background:radial-gradient(ellipse at 50% 70%,#1a0a2e 0%,#020510 100%)}
+      80% {background:radial-gradient(ellipse at 30% 50%,#091a35 0%,#020510 100%)}
+      100%{background:radial-gradient(ellipse at 50% 50%,#0d1635 0%,#020510 100%)}
+    }
+    #loader.hide{opacity:0;pointer-events:none}
+    #loader-3d{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+    .loader-inner{
+      position:relative;z-index:2;
+      display:flex;flex-direction:column;align-items:center;gap:1.8rem;
+      text-align:center;
+    }
+    .loader-name{
+      font-family:'Syne',sans-serif;font-weight:800;
+      line-height:.9;letter-spacing:-.02em;
+      opacity:0;animation:nameReveal 1s cubic-bezier(.22,1,.36,1) 1.8s forwards;
+    }
+    @keyframes nameReveal{
+      from{opacity:0;transform:translateY(30px) scale(.95)}
+      to  {opacity:1;transform:translateY(0)   scale(1)}
+    }
+    .loader-firstname{
+      display:block;font-size:clamp(3.5rem,10vw,7rem);
+      color:#fff;
+      text-shadow:0 0 60px rgba(0,200,180,.4),0 0 120px rgba(0,200,180,.2);
+    }
+    .loader-lastname{
+      display:block;font-size:clamp(2.5rem,7vw,5rem);
+      -webkit-text-stroke:2px var(--accent);color:transparent;
+      animation:colorShift 6s linear infinite;
+    }
+    #btn-reenter{
+      font-family:'Space Mono',monospace;font-size:.65rem;
+      letter-spacing:.14em;text-transform:uppercase;
+      padding:.4rem .9rem;
+      background:rgba(0,200,180,.1);
+      border:1px solid rgba(0,200,180,.4);
+      color:var(--accent);cursor:pointer;
+      transition:all .2s;white-space:nowrap;
+      border-radius:4px;
+    }
+    #btn-reenter:hover{
+      background:rgba(0,200,180,.2);
+      box-shadow:0 0 14px rgba(0,200,180,.35);
+    }
+    .loader-role{
+      font-family:'Space Mono',monospace;font-size:.75rem;
+      letter-spacing:.25em;color:rgba(0,200,180,.6);text-transform:uppercase;
+      opacity:0;animation:nameReveal 1s ease 2.4s forwards;
+    }
+    .loader-img-wrap{
+      width:min(340px,70vw);border-radius:14px;overflow:hidden;
+      border:1px solid rgba(0,200,180,.2);
+      box-shadow:0 0 40px rgba(0,200,180,.15);
+      opacity:0;animation:nameReveal 1s ease 2.8s forwards;
+    }
+    .loader-img-wrap img{
+      width:100%;display:block;
+      animation:colorShift 6s linear infinite;
+    }
+    @keyframes colorShift{
+      0%  {filter:hue-rotate(0deg)   brightness(1.05) saturate(1.2)}
+      25% {filter:hue-rotate(60deg)  brightness(1.15) saturate(1.4)}
+      50% {filter:hue-rotate(160deg) brightness(1.1)  saturate(1.3)}
+      75% {filter:hue-rotate(250deg) brightness(1.15) saturate(1.4)}
+      100%{filter:hue-rotate(360deg) brightness(1.05) saturate(1.2)}
+    }
+    .loader-click{
+      font-family:'Space Mono',monospace;font-size:.85rem;
+      letter-spacing:.35em;color:#fff;text-transform:uppercase;
+      display:flex;align-items:center;gap:.8rem;
+      opacity:0;animation:nameReveal .8s ease 3.2s forwards, clickPulse 1.6s ease-in-out 4s infinite;
+      text-shadow:0 0 20px rgba(0,200,180,.6);
+    }
+    .loader-click-arrow{font-size:1.4rem;color:var(--accent);animation:arrowPulse 1s ease-in-out infinite}
+    @keyframes arrowPulse{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+    @keyframes clickPulse{
+      0%,100%{opacity:.6;transform:scale(1)}
+      50%    {opacity:1;transform:scale(1.06)}
+    }
+
+    /* ============================================================
+       GLITCH EFFECT
+    ============================================================ */
+    .glitch{
+      position:relative;
+      display:inline-block;
+    }
+    .glitch::before,
+    .glitch::after{
+      content:attr(data-text);
+      position:absolute;
+      top:0;left:0;
+      width:100%;height:100%;
+      font:inherit;font-size:inherit;
+      font-weight:inherit;letter-spacing:inherit;
+      pointer-events:none;
+      opacity:0;
+    }
+    .glitch::before{
+      color:#ff003c;
+      animation:glitch-r 4s steps(1) infinite;
+    }
+    .glitch::after{
+      color:var(--accent);
+      animation:glitch-c 4s steps(1) infinite;
+    }
+    .glitch:hover::before{animation:glitch-r .5s steps(1) infinite}
+    .glitch:hover::after {animation:glitch-c .5s steps(1) infinite}
+
+    @keyframes glitch-r{
+      0%,8%,100%{opacity:0;clip-path:none;transform:none}
+      1%{opacity:1;clip-path:polygon(0 15%,100% 15%,100% 30%,0 30%);transform:translate(-4px,0)}
+      2%{opacity:1;clip-path:polygon(0 60%,100% 60%,100% 72%,0 72%);transform:translate( 3px,0)}
+      3%{opacity:1;clip-path:polygon(0 40%,100% 40%,100% 48%,0 48%);transform:translate(-3px,0)}
+      4%{opacity:1;clip-path:polygon(0 80%,100% 80%,100% 92%,0 92%);transform:translate( 4px,0)}
+      5%{opacity:1;clip-path:polygon(0  5%,100%  5%,100% 18%,0 18%);transform:translate(-2px,0)}
+      6%{opacity:0;clip-path:none;transform:none}
+    }
+    @keyframes glitch-c{
+      0%,8%,100%{opacity:0;clip-path:none;transform:none}
+      1%{opacity:1;clip-path:polygon(0 50%,100% 50%,100% 65%,0 65%);transform:translate( 4px,0)}
+      2%{opacity:1;clip-path:polygon(0 20%,100% 20%,100% 32%,0 32%);transform:translate(-4px,0)}
+      3%{opacity:1;clip-path:polygon(0 70%,100% 70%,100% 82%,0 82%);transform:translate( 3px,0)}
+      4%{opacity:1;clip-path:polygon(0  2%,100%  2%,100% 12%,0 12%);transform:translate(-3px,0)}
+      5%{opacity:1;clip-path:polygon(0 42%,100% 42%,100% 54%,0 54%);transform:translate( 2px,0)}
+      6%{opacity:0;clip-path:none;transform:none}
+    }
+
+    /* ============================================================
+       TIMELINE
+    ============================================================ */
+    .timeline{position:relative;margin-top:2.5rem;padding-left:1.8rem}
+    .timeline::before{
+      content:'';position:absolute;left:0;top:.45rem;bottom:.45rem;
+      width:1px;background:linear-gradient(to bottom,var(--accent),rgba(0,200,180,.08));
+    }
+    .tl-item{position:relative;margin-bottom:1.8rem;padding-left:1.4rem}
+    .tl-item:last-child{margin-bottom:0}
+    .tl-dot{
+      position:absolute;left:-1.8rem;top:.38rem;
+      width:9px;height:9px;border-radius:50%;
+      background:var(--bg);border:2px solid var(--accent);
+      box-shadow:0 0 7px rgba(0,200,180,.35);
+      transition:background .25s;
+    }
+    .tl-item:hover .tl-dot{background:var(--accent)}
+    .tl-year{
+      font-family:'Space Mono',monospace;font-size:.62rem;
+      letter-spacing:.18em;color:var(--accent);margin-bottom:.22rem;
+    }
+    .tl-label{
+      font-family:'DM Sans',sans-serif;font-size:.92rem;
+      color:var(--text);line-height:1.45;
+    }
+    .tl-item.tl-current .tl-dot{
+      background:var(--accent);animation:pulse 2s ease-in-out infinite;
+    }
+    .tl-item.tl-current .tl-label{color:var(--accent);font-weight:600}
 
     /* ============================================================
        ANIMATIONS
@@ -716,23 +1251,226 @@
     /* ============================================================
        RESPONSIVE
     ============================================================ */
+    /* ============================================================
+       RESPONSIVE — MOBILE COMPLET
+    ============================================================ */
+    @media(max-width:1100px){
+      .hero{padding:5rem 3rem 2rem;gap:2rem}
+      .hero-visual{width:min(460px,38vw)}
+    }
+
+    /* ============================================================
+       TABLETTE ≤ 900px
+    ============================================================ */
     @media(max-width:900px){
-      nav{padding:1rem 2rem}
+      nav{padding:1rem 1.5rem}
       .nav-links,.nav-coords{display:none}
       .nav-toggle{display:block}
-      section{padding:5rem 2rem}
-      .hero{padding:0 2rem}
-      .hero-visual{display:none}
+      section{padding:4rem 1.5rem}
+
+      /* Hero : colonne texte → vidéo */
+      .hero{padding:5rem 1.5rem 2rem;flex-direction:column;align-items:stretch;gap:1.5rem}
+      .hero-content{max-width:100%}
+      .hero-vi-col{
+        display:flex;width:100%;margin-left:0;
+        flex-direction:column;align-items:center;gap:.4rem;
+      }
+      .hero-visual{width:100%;aspect-ratio:16/9}
+      #hero-mute-btn{width:44px;height:44px;font-size:1rem}
+      #hero-sound-hint{font-size:.58rem}
+
+      h1.hero-name{white-space:normal;font-size:clamp(2.4rem,9vw,4.5rem)}
+      .hero-bio{font-size:.95rem}
+      .hero-ctas{flex-direction:row;flex-wrap:wrap;gap:.7rem}
+      .hero-ctas a,.hero-ctas button{flex:1 1 auto;min-width:140px;justify-content:center}
+
+      h2.section-title{font-size:clamp(1.8rem,6vw,3rem);margin-bottom:2.5rem}
+
+      /* Grilles */
       .about-grid,.contact-inner,.skills-layout{grid-template-columns:1fr}
-      .services-grid{grid-template-columns:1fr}
+      .services-grid{grid-template-columns:1fr 1fr}
       .projects-grid,.videos-grid,.certs-grid{grid-template-columns:1fr 1fr}
+
+      /* About */
+      .stats-table{font-size:.72rem}
+      .stats-table th:last-child,.stats-table td:last-child{display:none}
+
+      /* Maps gallery */
+      .gallery-scroll{gap:1rem}
+      .map-card{flex:0 0 240px}
+
+      /* Video cards */
+      .video-card-body h3{font-size:.9rem}
+      .video-card-body p{font-size:.78rem}
+
+      /* Écran arbre */
+      #ts-left{left:3vw}
+      #ts-right{right:3vw}
+      #ts-skill-name,#ts-skill-name-r{font-size:clamp(1.6rem,4vw,3.5rem)}
+      #ts-btn{font-size:.72rem;padding:.75rem 2rem}
     }
+
+    /* ============================================================
+       MOBILE ≤ 600px
+    ============================================================ */
     @media(max-width:600px){
+      nav{padding:.8rem 1rem;gap:.4rem}
+      .nav-logo{font-size:.75rem;gap:.4rem}
+      #btn-reenter{padding:.35rem .55rem;font-size:.58rem;letter-spacing:.08em}
+      #nav-mute-btn,#theme-toggle{width:38px;height:38px;margin-left:0}
+      .project-filters{width:100%}
+      .filter-btn{flex:1 1 auto;padding:.65rem .8rem;font-size:.62rem;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+      section{padding:3.5rem 1rem}
+
+      /* Hero */
+      .hero{padding:4.5rem 1rem 1.5rem;gap:1.2rem}
+      h1.hero-name{font-size:clamp(1.6rem,9vw,3.5rem)}
+      .hero-tag{font-size:.6rem;padding:.3rem .7rem}
+      .hero-bio{font-size:.88rem;padding-left:1rem;border-left-width:2px}
+      .hero-ctas{flex-direction:column;width:100%}
+      .hero-ctas a,.hero-ctas button{width:100%;justify-content:center}
+      .btn-primary-geo,.btn-outline-geo{font-size:.75rem;padding:.8rem 1.2rem;min-height:44px}
+
+      /* Vidéo hero plein écran mobile */
+      .hero-vi-col{width:100%}
+      .hero-visual{aspect-ratio:4/3}
+      #hero-mute-btn{width:44px;height:44px}
+
+      h2.section-title{font-size:clamp(1.6rem,8vw,2.5rem);margin-bottom:2rem}
+      .section-label{font-size:.6rem}
+
+      /* Grilles 1 colonne */
       .projects-grid,.videos-grid,.certs-grid{grid-template-columns:1fr}
+      #projects-grid{grid-template-columns:1fr!important}
+      .services-grid{grid-template-columns:1fr;gap:1rem}
+      .service-card{padding:1.8rem 1.2rem}
+
+      /* Maps : cartes plus petites */
+      .map-card{flex:0 0 85vw}
+
+      /* Video cards */
+      .video-card-body{padding:.9rem}
+      .video-card-body h3{font-size:.88rem}
+
+      /* About */
+      .about-img-wrap{max-width:100%}
+      .about-img-badge{right:-.5rem;bottom:-.5rem}
+
+      /* Contact form */
+      .contact_grid{grid-template-columns:1fr}
+      .contact-form input,.contact-form textarea,.contact-form select{
+        font-size:1rem; /* évite le zoom iOS */
+        padding:.75rem 1rem;
+      }
+
+      /* Skills */
+      .skills-layout>div:last-child{display:none}
+      .skill-bar-label{font-size:.68rem}
+
+      /* Footer */
+      footer{flex-direction:column;gap:.8rem;text-align:center;padding:1.5rem 1rem}
+
+      /* Loader */
+      .loader-firstname{font-size:clamp(2.8rem,14vw,5rem)}
+      .loader-lastname{font-size:clamp(2rem,10vw,3.5rem)}
+      .loader-role{font-size:.6rem;letter-spacing:.15em}
+      .loader-img-wrap{width:min(240px,80vw)}
+      .loader-click{font-size:.7rem;letter-spacing:.2em}
+
+      /* Écran arbre */
+      #ts-left{left:50%;top:auto;bottom:22%;transform:translateX(-50%);text-align:center;width:90vw}
+      #ts-right{display:none}
+      #ts-skill-name{font-size:clamp(1.8rem,8vw,3rem);transform:translateY(15px)}
+      #ts-skill-name.show{transform:translateY(0)}
+      #ts-btn{font-size:.7rem;padding:.7rem 1.8rem;bottom:6%;letter-spacing:.2em}
+    }
+
+    /* ============================================================
+       TRÈS PETIT MOBILE ≤ 380px
+    ============================================================ */
+    @media(max-width:600px){.floating-coords{display:none}}
+    @media (hover:none),(pointer:coarse){
+      body{cursor:auto}
+      .cursor,.cursor-ring{display:none!important}
+    }
+    @media(max-width:380px){
+      h1.hero-name{font-size:clamp(1.6rem,9vw,3rem)}
+      .loader-firstname{font-size:clamp(2.4rem,16vw,4rem)}
+      .loader-lastname{font-size:clamp(1.8rem,12vw,3rem)}
+      #ts-skill-name{font-size:clamp(1.5rem,9vw,2.5rem)}
+      .projects-grid{grid-template-columns:1fr!important}
+      .map-card{flex:0 0 92vw}
     }
   </style>
+  <style>
+    /* === Projects grid override === */
+    #projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+    #projects-grid .project-card{background:#1b2a44;border:1px solid rgba(0,200,180,.18);overflow:hidden;position:relative;transition:all .3s ease}
+    #projects-grid .project-card:hover{border-color:rgba(0,200,180,.4);transform:translateY(-6px);box-shadow:0 0 40px rgba(0,200,180,.18)}
+    #projects-grid .project-img-wrap{position:relative;overflow:hidden;aspect-ratio:16/10;background:#1f304c}
+    #projects-grid .project-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease;filter:saturate(.8)}
+    #projects-grid .project-card:hover .project-img-wrap img{transform:scale(1.06);filter:saturate(1.1)}
+    #projects-grid .project-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(6,11,20,.95) 0%,transparent 60%)}
+    #projects-grid .project-category{position:absolute;top:1rem;right:1rem;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .7rem;background:rgba(0,200,180,.15);border:1px solid rgba(0,200,180,.3);color:#00c8b4}
+    #projects-grid .project-body{padding:1.5rem}
+    #projects-grid .project-stack{font-family:'Space Mono',monospace;font-size:.65rem;color:#00c8b4;letter-spacing:.1em;margin-bottom:.6rem}
+    #projects-grid .project-body h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:1rem;line-height:1.3;color:#e8edf5}
+    #projects-grid .project-note{display:flex;align-items:center;gap:.4rem;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.03em;color:#8b9bb4;margin:-.4rem 0 1rem;line-height:1.4}
+    #projects-grid .project-note i{color:#00c8b4;font-size:.85rem}
+    #projects-grid .project-links{display:flex;gap:.7rem}
+    #projects-grid .project-link-btn{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.08em;padding:.4rem .9rem;border:1px solid rgba(0,200,180,.18);color:#6b7d99;text-decoration:none;transition:all .2s}
+    #projects-grid .project-link-btn:hover{color:#00c8b4;border-color:#00c8b4}
+    #projects-grid .project-link-btn.primary{background:rgba(0,200,180,.1);color:#00c8b4;border-color:rgba(0,200,180,.3)}
+    .project-card.hidden{display:none}
+    @media(max-width:900px){#projects-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){#projects-grid{grid-template-columns:1fr}}
+
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="assets/vendor/three/GLTFLoader.js"></script>
+  <script src="assets/vendor/three/OrbitControls.js"></script>
 </head>
 <body style="background-color:var(--bg);">
+
+<!-- LOADER -->
+<div id="loader">
+  <canvas id="loader-3d"></canvas>
+  <div class="loader-inner">
+    <div class="loader-name">
+      <span class="loader-firstname">ERWAN</span>
+      <span class="loader-lastname">N'GUESSAN</span>
+    </div>
+    <div class="loader-role">Géomaticien · Data Analyste SIG</div>
+    <div class="loader-img-wrap">
+      <img src="assets/image/fond_vrai.webp" decoding="async" alt="intro">
+    </div>
+    <div class="loader-click">
+      <span class="loader-click-arrow">▶</span>
+      CLIQUER POUR DÉMARRER
+    </div>
+  </div>
+</div>
+
+<!-- TRANSITION TREE SCREEN -->
+<div id="ts-screen">
+  <div id="ts-tree-container"></div>
+  <div id="ts-left">
+    <div id="ts-skill-label"></div>
+    <div id="ts-skill-name"></div>
+  </div>
+  <div id="ts-right">
+    <div id="ts-skill-label-r"></div>
+    <div id="ts-skill-name-r"></div>
+  </div>
+  <button id="ts-btn">✦ BIENVENUE ✦</button>
+</div>
+
+<!-- PROGRESS BAR -->
+<div id="read-progress"></div>
+
+<!-- PARTICLES -->
+<div id="particles-js" style="position:fixed;inset:0;z-index:0;pointer-events:none"></div>
 
 <!-- CURSOR -->
 <div class="cursor" id="cursor"></div>
@@ -755,7 +1493,9 @@
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-coords" id="live-time">-- : -- : --</div>
-  <button id="theme-toggle" type="button" aria-label="Basculer le thème">🌙</button>
+  <button id="btn-reenter" title="Retour à l'intro">◈ INTRO</button>
+  <button id="nav-mute-btn" title="Son de la vidéo"><i class="fi fi-sr-volume-mute"></i></button>
+  <button id="theme-toggle" type="button" aria-label="Basculer le thème"><i class="fi fi-rr-moon-stars"></i></button>
   <div class="nav-toggle" id="nav-toggle"><i class="bx bx-menu"></i></div>
 </nav>
 
@@ -764,8 +1504,21 @@
 ============================================================ -->
 <section class="hero" id="hero">
 
+  <!-- Heatmap canvas -->
+  <canvas id="heatmap-canvas" style="
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    opacity:0.15;pointer-events:none;z-index:0;
+  "></canvas>
+
   <!-- Topographic rings SVG -->
   <svg class="topo-rings" viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="radarGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="rgba(0,200,180,0)"/>
+        <stop offset="100%" stop-color="rgba(0,200,180,0.6)"/>
+      </linearGradient>
+    </defs>
     <circle cx="350" cy="350" r="320"/>
     <circle cx="350" cy="350" r="290"/>
     <circle cx="350" cy="350" r="260"/>
@@ -782,21 +1535,32 @@
     <line x1="270" y1="350" x2="430" y2="350" stroke="rgba(0,200,180,.1)" stroke-width="1"/>
     <circle cx="350" cy="350" r="6" fill="rgba(0,200,180,.3)"/>
     <circle cx="350" cy="350" r="2" fill="rgba(0,200,180,.8)"/>
+    <!-- radar sweep -->
+    <line id="radar-sweep" x1="350" y1="350" x2="350" y2="30"
+      stroke="url(#radarGrad)" stroke-width="2">
+      <animateTransform attributeName="transform" type="rotate"
+        from="0 350 350" to="360 350 350" dur="4s" repeatCount="indefinite"/>
+    </line>
   </svg>
 
   <div class="hero-content">
-    <div class="hero-tag">Géomaticien &amp; Data Analyste SIG</div>
+    <div class="hero-tag">Géomaticien et Data Analyste SIG</div>
     <h1 class="hero-name">
-      ERWAN<br>
+      <span class="glitch" data-text="ERWAN">ERWAN</span><br>
       <span class="line2">N'GUESSAN</span>
     </h1>
     <p class="hero-roles"><span id="typed-role">Géomaticien</span><span class="cursor-blink"></span></p>
     <p class="hero-bio">
-      Passionné par la géomatique, l’analyse spatiale et la télédétection, je suis étudiant en
-      <strong>Master Géomatique et Modélisation Spatiale</strong> à Aix-Marseille.
-    Je suis actuellement stagiaire au Centre Léon Bérard (Lyon), où je travaille sur des données statistiques liées aux cancers afin d’analyser leur répartition
-    identifier des tendances et produire des visualisations claires pour l’aide à la décision.
-    J’aime transformer des données complexes en résultats lisibles, à travers des cartes, des indicateurs et des analyses reproductibles.
+      <span class="bio-phrase">Passionné par la géomatique, l’analyse spatiale et la télédétection,
+      je suis titulaire d’un <strong>Master Géomatique et Modélisation Spatiale</strong>
+      d’Aix-Marseille Université.</span>
+      <span class="bio-phrase">J’ai réalisé mon stage au <span class="bio-highlight">Centre Léon Bérard</span>
+      (<span class="bio-highlight">Lyon</span>), où j’ai analysé la répartition géographique
+      des cancers sur l'ensemble du territoire français, produit des visualisations spatiales et statistiques
+      pour l’aide à la décision médicale.</span>
+      <span class="bio-phrase">Actuellement basé à <span class="bio-highlight">Lyon</span>,
+      je suis <span class="bio-badge">Ingénieur d'étude au Centre Léon Bérard</span>
+      en géomatique, data analyse SIG et web mapping.</span>
     </p>
     <div class="hero-ctas">
       <a href="assets/pdf/C.V.pdf" download class="btn-primary-geo">
@@ -816,8 +1580,17 @@
     </div>
   </div>
 
-  <div class="hero-visual">
-    <img src="assets/image/fond_vrai.png" alt="Illustration biographie">
+  <div class="hero-vi-col">
+    <div class="hero-visual">
+      <div class="hero-vi-wrap">
+        <video id="hero-vi" class="hero-visual-img"
+               src="assets/video/web/caracteristique.mp4" poster="assets/video/posters/caracteristique.jpg" preload="auto"
+               autoplay loop playsinline muted
+               disablePictureInPicture
+               controlsList="nofullscreen nodownload noremoteplayback"></video>
+      </div>
+    </div>
+    <div id="hero-sound-hint">🔊 Cliquer sur 🔇 pour couper le son</div>
   </div>
 
   <div class="scroll-hint">
@@ -833,10 +1606,10 @@
 ============================================================ -->
 <section id="about">
   <div class="section-label">Biographie</div>
-  <h2 class="section-title">À PROPOS <span>DE MOI</span></h2>
+  <h2 class="section-title"><i class="fi fi-ts-book-user"></i> À PROPOS <span>DE MOI</span></h2>
   <div class="about-grid">
     <div class="about-img-wrap fade-in">
-      <img src="assets/image/photo_erwan.PNG" alt="Erwan N'Guessan">
+      <img src="assets/image/photo_erwan.webp" decoding="async" alt="Erwan N'Guessan">
       <div class="about-img-frame"></div>
       <div class="about-img-badge">
         <strong>5+</strong>
@@ -847,7 +1620,7 @@
       <p>
         Titulaire d'un <strong>Master en géographie physique</strong>, je renforce
         mes capacités pratiques à Aix-Marseille Université. Mes domaines de prédilection :
-        la forêt, l'aménagement du territoire et l'urbanisme durable.
+        la forêt, la santé, l'aménagement du territoire et l'urbanisme durable.
       </p>
       <p>
         Ma force : croiser la <strong>rigueur scientifique</strong> de la géographie physique
@@ -884,9 +1657,59 @@
           </tr>
         </tbody>
       </table>
+
+      <div class="timeline">
+        <div class="tl-item fade-in">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2018</div>
+          <div class="tl-label">Début de Licence en Géographie Physique — Université Jean Lorougnon Guédé, Daloa</div>
+        </div>
+        <div class="tl-item fade-in">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2021</div>
+          <div class="tl-label">Master en Géographie Physique — Université Jean Lorougnon Guédé, Daloa</div>
+        </div>
+        <div class="tl-item fade-in">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2023</div>
+          <div class="tl-label">Diplômé Master Géographie Physique</div>
+        </div>
+        <div class="tl-item fade-in">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2024</div>
+          <div class="tl-label">Master Géomatique et Modélisation Spatiale — AMU</div>
+        </div>
+        <div class="tl-item fade-in">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2025</div>
+          <div class="tl-label">Stage Centre Léon Bérard, Lyon — Analyse spatiale des cancers</div>
+        </div>
+        <div class="tl-item tl-current fade-in">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2026</div>
+          <div class="tl-label">Diplôme Géomatique · Disponible pour opportunités</div>
+        </div>
+      </div>
+
+      <div id="parcours-map" style="
+        height:250px;width:100%;
+        border:1px solid var(--border);
+        border-radius:8px;margin-top:2rem;
+      "></div>
+
     </div>
   </div>
 </section>
+
+<!-- ============================================================
+     CHIFFRES CLÉS
+============================================================ -->
+<div class="kpi-band" aria-label="Chiffres clés">
+  <div class="kpi"><span class="kpi-num" data-count="projects">0</span><span class="kpi-label">Projets web &amp; SIG</span></div>
+  <div class="kpi"><span class="kpi-num" data-count="maps">0</span><span class="kpi-label">Cartes réalisées</span></div>
+  <div class="kpi"><span class="kpi-num" data-count="videos">0</span><span class="kpi-label">Démos vidéo</span></div>
+  <div class="kpi"><span class="kpi-num" data-to="34859">0</span><span class="kpi-label">Communes cartographiées · EEPATHO</span></div>
+</div>
 
 <hr class="divider">
 
@@ -895,7 +1718,7 @@
 ============================================================ -->
 <section id="services">
   <div class="section-label">Ce que je propose</div>
-  <h2 class="section-title">MES <span>SERVICES</span></h2>
+  <h2 class="section-title"><i class="fi fi-bs-time-twenty-four"></i> MES <span>SERVICES</span></h2>
   <div class="services-grid">
     <div class="service-card fade-in">
       <div class="service-num">01 /</div>
@@ -943,35 +1766,52 @@
 ============================================================ -->
 <section id="projects">
   <div class="section-label">Mes projets récents</div>
-  <h2 class="section-title">PROJETS <span>WEB & SIG</span></h2>
+  <h2 class="section-title"><i class="fi fi-tr-folder-open"></i> PROJETS <span>WEB &amp; SIG</span></h2>
 
   <div class="project-filters">
     <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="stage">Stage</button>
     <button class="filter-btn" data-filter="web-mapping">Web Mapping</button>
     <button class="filter-btn" data-filter="data-engineering">Data Eng.</button>
     <button class="filter-btn" data-filter="automation">Automation</button>
   </div>
 
-  <div class="projects-grid" id="projects-grid">
+  <div id="projects-grid">
 
-    <div class="project-card" data-cat="web-mapping">
+    <div class="project-card" data-cat="stage">
       <div class="project-img-wrap">
-        <img src="assets/projects/marseille-cyclable/preview.png" alt="Marseille Cyclable" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00c8b4?text=Marseille+Cyclable'">
+        <img src="assets/projects/eepatho/preview.webp" decoding="async" alt="EEPATHO — Atlas géo-santé" loading="lazy">
         <div class="project-overlay"></div>
-        <span class="project-category">Web Mapping</span>
+        <span class="project-category">Stage</span>
       </div>
       <div class="project-body">
-        <div class="project-stack">Leaflet · Turf · Chart.js</div>
-        <h3>Mobilité urbaine — Pistes & parkings vélo (Marseille)</h3>
+        <div class="project-stack">MapLibre GL JS · SIG santé · INSEE</div>
+        <h3>EEPATHO — Atlas géo-santé (Centre Léon Bérard)</h3>
+        <div class="project-note"><i class="bx bx-lock-alt"></i> Accès réservé à l'équipe Géo-Santé — démo vidéo ci-dessous</div>
         <div class="project-links">
-          <a href="assets/projects/marseille-cyclable/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+          <a href="https://eepatho-version-beta.netlify.app/accueil.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
         </div>
       </div>
     </div>
 
     <div class="project-card" data-cat="web-mapping">
       <div class="project-img-wrap">
-        <img src="assets/projects/projet-sante-abidjan/data/preview.png" alt="Santé Abidjan" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00c8b4?text=Santé+Abidjan'">
+        <img src="assets/projects/marseille-cyclable/preview.webp" decoding="async" alt="Marseille Cyclable" loading="lazy">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Leaflet · Turf · Chart.js</div>
+        <h3>Mobilité urbaine — Pistes &amp; parkings vélo (Marseille)</h3>
+        <div class="project-links">
+          <a href="assets/projects/marseille-cyclable/index.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/projet-sante-abidjan/data/preview.webp" decoding="async" alt="Santé Abidjan" loading="lazy">
         <div class="project-overlay"></div>
         <span class="project-category">Web Mapping</span>
       </div>
@@ -979,14 +1819,14 @@
         <div class="project-stack">Leaflet · Chart.js · OSM</div>
         <h3>Accès aux soins — Dashboard Abidjan</h3>
         <div class="project-links">
-          <a href="assets/projects/projet-sante-abidjan/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+          <a href="assets/projects/projet-sante-abidjan/index.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
         </div>
       </div>
     </div>
 
     <div class="project-card" data-cat="web-mapping">
       <div class="project-img-wrap">
-        <img src="assets/projects/marseille-espaces-verts/data/preview.png" alt="Espaces verts Marseille" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/7ef0a0?text=Espaces+verts'">
+        <img src="assets/projects/marseille-espaces-verts/data/preview.webp" decoding="async" alt="Espaces verts Marseille" loading="lazy">
         <div class="project-overlay"></div>
         <span class="project-category">Web Mapping</span>
       </div>
@@ -994,14 +1834,14 @@
         <div class="project-stack">Leaflet · Turf · Heatmap</div>
         <h3>Espaces verts et zones protégées de Marseille</h3>
         <div class="project-links">
-          <a href="assets/projects/marseille-espaces-verts/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+          <a href="assets/projects/marseille-espaces-verts/index.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
         </div>
       </div>
     </div>
 
     <div class="project-card" data-cat="web-mapping">
       <div class="project-img-wrap">
-        <img src="assets/projects/“Réseau de transports à Marseille (RTM)/logo_project_rtm.png" alt="RTM Marseille" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00aaff?text=RTM+Marseille'">
+        <img src="assets/projects/&#x201C;Réseau de transports à Marseille (RTM)/logo_project_rtm.webp" decoding="async" alt="RTM Marseille" loading="lazy">
         <div class="project-overlay"></div>
         <span class="project-category">Web Mapping</span>
       </div>
@@ -1009,14 +1849,14 @@
         <div class="project-stack">Leaflet · GTFS · GeoJSON</div>
         <h3>Réseau de transports à Marseille (RTM)</h3>
         <div class="project-links">
-          <a href="assets/projects/“Réseau de transports à Marseille (RTM)/index.html" target="_blank" class="project-link-btn primary">Voir la démo</a>
+          <a href="assets/projects/&#x201C;Réseau de transports à Marseille (RTM)/index.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
         </div>
       </div>
     </div>
 
     <div class="project-card" data-cat="data-engineering">
       <div class="project-img-wrap">
-        <img src="assets/projects/logo_meteo.png" alt="Analyse climatique" loading="lazy" onerror="this.src='https://via.placeholder.com/400x250/0a1120/00c8b4?text=Analyse+Climatique'">
+        <img src="assets/projects/logo_meteo.webp" decoding="async" alt="Analyse climatique" loading="lazy">
         <div class="project-overlay"></div>
         <span class="project-category">Data Engineering</span>
       </div>
@@ -1024,7 +1864,67 @@
         <div class="project-stack">Dashboard · Météo · Analyse spatiale</div>
         <h3>Analyse spatiale et climatique — Bouches-du-Rhône</h3>
         <div class="project-links">
-          <a href="https://erwan336.github.io/analyse-spatiale-climatique-bouches-du-rhone/" target="_blank" class="project-link-btn primary">Voir en ligne</a>
+          <a href="https://erwan336.github.io/analyse-spatiale-climatique-bouches-du-rhone/" target="_blank" class="project-link-btn primary">Accéder au projet</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="data-engineering">
+      <div class="project-img-wrap">
+        <img src="assets/projects/projet_linkedin_r_dashboard/preview.webp" decoding="async" alt="Dashboard R" loading="lazy">
+        <div class="project-overlay"></div>
+        <span class="project-category">Data Engineering</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">R · Quarto · Dashboard · Dataviz</div>
+        <h3>Prévalence &amp; Incidence du Diabète en France — Dashboard R</h3>
+        <div class="project-links">
+          <a href="assets/projects/projet_linkedin_r_dashboard/index.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/bivarier/capture.webp" decoding="async" alt="Carte bivariée" loading="lazy">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">Leaflet · Choroplèthe · Analyse bivariée · FDEP</div>
+        <h3>Corrélation Bivariée — Débits de Tabac et FDEP</h3>
+        <div class="project-links">
+          <a href="assets/projects/bivarier/index (1).html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/3d_lyon/VIEUX-LYON 3D.webp" decoding="async" alt="Vue 3D Vieux Lyon" loading="lazy">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">3D · WebGL · Visualisation urbaine</div>
+        <h3>Vue 3D — Vieux Lyon et Métropole</h3>
+        <div class="project-links">
+          <a href="assets/projects/3d_lyon/vieux_lyon_3d_v5.html" target="_blank" class="project-link-btn primary">Accéder au projet</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="project-card" data-cat="web-mapping">
+      <div class="project-img-wrap">
+        <img src="assets/projects/TOPO_3D/TOPO.webp" decoding="async" alt="Topographie 3D Pyrénées et Corse" loading="lazy">
+        <div class="project-overlay"></div>
+        <span class="project-category">Web Mapping</span>
+      </div>
+      <div class="project-body">
+        <div class="project-stack">3D · Topographie · WebGL</div>
+        <h3>Topographie 3D — Pyrénées &amp; Corse</h3>
+        <div class="project-links">
+          <a href="https://darling-moxie-e1c0e6.netlify.app/" target="_blank" class="project-link-btn primary">Accéder au projet</a>
         </div>
       </div>
     </div>
@@ -1039,12 +1939,13 @@
 ============================================================ -->
 <section id="cartes" class="maps-section">
   <div class="section-label">Travaux personnels</div>
-  <h2 class="section-title">CARTES <span>RÉALISÉES</span></h2>
+  <h2 class="section-title"><i class="fi fi-ts-earth-americas"></i> CARTES <span>RÉALISÉES</span></h2>
 
   <div class="gallery-scroll" id="gallery-cartes"></div>
   <div class="scroll-controls">
     <button class="scroll-btn" id="gallery-prev"><i class="bx bx-chevron-left"></i></button>
     <button class="scroll-btn" id="gallery-next"><i class="bx bx-chevron-right"></i></button>
+    <button class="scroll-btn" id="gallery-playpause"><i class="bx bx-pause"></i></button>
   </div>
 </section>
 
@@ -1055,10 +1956,38 @@
 ============================================================ -->
 <section id="videos">
   <div class="section-label">Démos en vidéo</div>
-  <h2 class="section-title">PROJETS <span>EN VIDÉO</span></h2>
+  <h2 class="section-title"><i class="fi fi-br-video-camera-alt"></i> PROJETS <span>EN VIDÉO</span></h2>
   <div class="videos-grid">
+    <div class="video-card video-featured fade-in">
+      <div class="vf-media">
+        <span class="vf-badge">Nouveau · Motion design</span>
+        <video controls preload="none" playsinline poster="assets/video/posters/EEPATHO_motion_design_voix_v2.jpg">
+          <source src="assets/video/web/EEPATHO_motion_design_voix_v2.mp4" type="video/mp4">
+          <source src="assets/video/EEPATHO_motion_design_voix_v2.mp4" type="video/mp4">
+        </video>
+        <button class="vf-play" type="button" aria-label="Lire la vidéo"><i class="bx bx-play"></i></button>
+      </div>
+      <div class="video-card-body">
+        <div class="video-cat">Stage — Centre Léon Bérard</div>
+        <h3>EEPATHO — Le film de présentation</h3>
+        <p>Motion design commenté en voix off présentant l'application EEPATHO et les maladies chroniques du foie qu'elle cartographie.</p>
+        <div class="vf-meta"><span>Motion design</span><span>Voix off</span><span>0:38</span></div>
+      </div>
+    </div>
     <div class="video-card fade-in">
-      <video controls preload="metadata">
+      <video controls preload="none" playsinline poster="assets/video/posters/eepatho.jpg">
+        <source src="assets/video/web/eepatho.mp4" type="video/mp4">
+        <source src="assets/video/eepatho.mp4" type="video/mp4">
+      </video>
+      <div class="video-card-body">
+        <div class="video-cat">Stage — Centre Léon Bérard</div>
+        <h3>EEPATHO — Atlas géo-santé</h3>
+        <p>Présentation de l'application de visualisation des variables territoriales du projet de stage de fin d'études.</p>
+      </div>
+    </div>
+    <div class="video-card fade-in">
+      <video controls preload="none" playsinline poster="assets/video/posters/acces_sante.jpg">
+        <source src="assets/video/web/acces_sante.mp4" type="video/mp4">
         <source src="assets/video/acces_sante.mp4" type="video/mp4">
       </video>
       <div class="video-card-body">
@@ -1068,7 +1997,8 @@
       </div>
     </div>
     <div class="video-card fade-in">
-      <video controls preload="metadata">
+      <video controls preload="none" playsinline poster="assets/video/posters/Analyse_spatiale des transport.jpg">
+        <source src="assets/video/web/Analyse_spatiale%20des%20transport.mp4" type="video/mp4">
         <source src="assets/video/Analyse_spatiale%20des%20transport.mp4" type="video/mp4">
       </video>
       <div class="video-card-body">
@@ -1078,13 +2008,36 @@
       </div>
     </div>
     <div class="video-card fade-in">
-      <video controls preload="metadata">
+      <video controls preload="none" playsinline poster="assets/video/posters/RESUMER_DAHBORD_METEROLOGIQUE.jpg">
+        <source src="assets/video/web/RESUMER_DAHBORD_METEROLOGIQUE.mp4" type="video/mp4">
         <source src="assets/video/RESUMER_DAHBORD_METEROLOGIQUE.mp4" type="video/mp4">
       </video>
       <div class="video-card-body">
-        <div class="video-cat">Data & Dashboards</div>
+        <div class="video-cat">Data et Dashboards</div>
         <h3>Dashboard météorologique</h3>
         <p>Résumé interactif : tendances, extrêmes et comparaisons locales.</p>
+      </div>
+    </div>
+    <div class="video-card fade-in">
+      <video controls preload="none" playsinline poster="assets/video/posters/Prévalence_incidence.jpg">
+        <source src="assets/video/web/Prévalence_incidence.mp4" type="video/mp4">
+        <source src="assets/video/Prévalence_incidence.mp4" type="video/mp4">
+      </video>
+      <div class="video-card-body">
+        <div class="video-cat">Data et Dashboards</div>
+        <h3>Prévalence et Incidence — Dashboard R</h3>
+        <p>Visualisation interactive de la prévalence et de l'incidence du diabète en France.</p>
+      </div>
+    </div>
+    <div class="video-card fade-in">
+      <video controls preload="none" playsinline poster="assets/video/posters/Application_RSHANY.jpg">
+        <source src="assets/video/web/Application_RSHANY.mp4" type="video/mp4">
+        <source src="assets/video/Application_RSHANY.mp4" type="video/mp4">
+      </video>
+      <div class="video-card-body">
+        <div class="video-cat">Application R</div>
+        <h3>Application R Shiny</h3>
+        <p>Démonstration d'une application interactive développée avec R Shiny.</p>
       </div>
     </div>
   </div>
@@ -1097,7 +2050,7 @@
 ============================================================ -->
 <section id="skills">
   <div class="section-label">Compétences</div>
-  <h2 class="section-title">SKILLS <span>&amp; OUTILS</span></h2>
+  <h2 class="section-title"><i class="fi fi-tr-tool-box"></i> SKILLS <span>et OUTILS</span></h2>
   <div class="skills-layout">
     <div>
       <div class="skill-bars" id="skill-bars">
@@ -1128,10 +2081,10 @@
       </div>
     </div>
     <div>
-      <video class="skill-video-wrap" style="width:100%;border:1px solid var(--border)" controls preload="metadata">
-        <source src="assets/image/comp.mp4" type="video/mp4">
+      <video class="skill-video-wrap" style="width:100%;border:1px solid var(--border)" controls preload="none" playsinline poster="assets/video/posters/comp.jpg">
+        <source src="assets/video/web/comp.mp4" type="video/mp4">
       </video>
-      <img src="assets/image/competences_VR.png" alt="Compétences" class="skills-img" style="margin-top:1.5rem" loading="lazy">
+      <img src="assets/image/competences_VR.webp" decoding="async" alt="Compétences" class="skills-img" style="margin-top:1.5rem" loading="lazy">
     </div>
   </div>
 </section>
@@ -1143,7 +2096,7 @@
 ============================================================ -->
 <section id="certifications">
   <div class="section-label">Formation</div>
-  <h2 class="section-title">CERTIFI<span>CATIONS</span></h2>
+  <h2 class="section-title"><i class="fi fi-rs-diploma"></i> CERTIFI<span>CATIONS</span></h2>
   <div class="certs-grid">
     <div class="cert-card fade-in">
       <i class="bx bx-badge-check cert-icon"></i>
@@ -1163,6 +2116,30 @@
       <p>Document officiel attestant d'une expérience professionnelle dans le domaine géospatial.</p>
       <a href="assets/certificats/attestation_travail.png" target="_blank" download class="cert-link">Télécharger →</a>
     </div>
+    <div class="cert-card fade-in">
+      <i class="bx bx-water cert-icon"></i>
+      <h3>Formation modélisation prédictive — Mollusques (QGIS)</h3>
+      <p>Formation sur la modélisation prédictive de la répartition des mollusques à l'aide d'une extension QGIS dédiée.</p>
+      <a href="assets/certificats/mollusce.pdf" target="_blank" class="cert-link">Voir le PDF →</a>
+    </div>
+    <div class="cert-card fade-in">
+      <i class="bx bx-calendar-event cert-icon"></i>
+      <h3>École d'été 2025</h3>
+      <p>Attestation de participation à l'école d'été 2025.</p>
+      <a href="assets/certificats/ecole%20ete%202025.pdf" target="_blank" class="cert-link">Voir le PDF →</a>
+    </div>
+    <div class="cert-card fade-in">
+      <i class="bx bx-calendar-event cert-icon"></i>
+      <h3>École d'été 2026</h3>
+      <p>Attestation de participation à l'école d'été 2026.</p>
+      <a href="assets/certificats/ecole%20ete%202026.pdf" target="_blank" class="cert-link">Voir le PDF →</a>
+    </div>
+    <div class="cert-card fade-in">
+      <i class="bx bx-image cert-icon"></i>
+      <h3>Poster scientifique — École d'été 2026</h3>
+      <p>Poster scientifique académique présenté lors de l'école d'été 2026.</p>
+      <a href="assets/certificats/Sciences%20Biologie%20Poster%20Scientifique%20Acad%C3%A9mique%20Affiche%20Vert%20Moderne%20Illustr%C3%A9.png" target="_blank" class="cert-link">Voir le poster →</a>
+    </div>
   </div>
 </section>
 
@@ -1173,10 +2150,10 @@
 ============================================================ -->
 <section id="contact" class="contact-section">
   <div class="section-label">Restons en lien</div>
-  <h2 class="section-title">CON<span>TACT</span></h2>
+  <h2 class="section-title"><i class="fi fi-rs-phone-plus"></i> CON<span>TACT</span></h2>
   <div class="contact-inner">
     <div class="contact-info">
-      <p>Disponible pour un stage ou une alternance dès maintenant. N'hésitez pas à me contacter pour discuter de vos projets géomatiques.</p>
+      <p>Disponible pour tout projet et opportunités. N'hésitez pas à me contacter pour discuter de vos projets géomatiques.</p>
       <div class="contact-cards">
         <a href="mailto:ericn4712@gmail.com" class="contact-card">
           <div class="contact-card-icon"><i class="bx bx-envelope"></i></div>
@@ -1217,6 +2194,7 @@
       <button class="btn-primary-geo" type="submit" style="align-self:flex-start">
         <i class="bx bx-send"></i> Envoyer
       </button>
+      <div class="form-status" role="status" aria-live="polite"></div>
     </form>
   </div>
 </section>
@@ -1234,16 +2212,17 @@
 <div id="modal-overlay" style="
   display:none;position:fixed;inset:0;z-index:1000;
   background:rgba(6,11,20,.95);
-  display:none;align-items:center;justify-content:center;padding:2rem;
+  align-items:flex-start;justify-content:center;
+  padding:4rem 2rem 2rem;overflow-y:auto;
 ">
-  <div style="max-width:900px;width:100%;position:relative">
+  <div style="max-width:90vw;width:100%;position:relative;margin:auto">
     <button id="modal-close" style="
       position:absolute;top:-2.5rem;right:0;
       background:none;border:1px solid var(--border);color:var(--muted);
       font-size:.8rem;font-family:'Space Mono',monospace;
       padding:.3rem .8rem;cursor:pointer;
     ">[ Fermer ]</button>
-    <img id="modal-img" src="" alt="" style="width:100%;border:1px solid var(--border)">
+    <img id="modal-img" src="" alt="" style="width:100%;height:auto;max-height:88vh;object-fit:contain;display:block;border:1px solid var(--border)">
     <div id="modal-title" style="
       font-family:'Space Mono',monospace;font-size:.7rem;
       color:var(--muted);margin-top:.7rem;
@@ -1255,23 +2234,290 @@
      SCRIPTS
 ============================================================ -->
 <script>
+/* --- Intro loader (click to start) --- */
+(function(){
+  const loader=document.getElementById('loader');
+  if(!loader) return;
+
+  /* === Son d'apparition du globe === */
+  function playGlobeSound(){
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      const master=ctx.createGain();master.gain.value=.35;master.connect(ctx.destination);
+      /* Sweep montant spectaculaire */
+      const osc=ctx.createOscillator(),gOsc=ctx.createGain();
+      osc.type='sine';
+      osc.frequency.setValueAtTime(40,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+.6);
+      osc.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+2.5);
+      gOsc.gain.setValueAtTime(0,ctx.currentTime);
+      gOsc.gain.linearRampToValueAtTime(1,ctx.currentTime+.08);
+      gOsc.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+2.5);
+      osc.connect(gOsc);gOsc.connect(master);osc.start();osc.stop(ctx.currentTime+2.5);
+      /* Burst de bruit blanc */
+      const bufSz=ctx.sampleRate*.6,buf=ctx.createBuffer(1,bufSz,ctx.sampleRate);
+      const d=buf.getChannelData(0);for(let i=0;i<bufSz;i++)d[i]=Math.random()*2-1;
+      const ns=ctx.createBufferSource(),nf=ctx.createBiquadFilter(),ng=ctx.createGain();
+      ns.buffer=buf;nf.type='bandpass';nf.frequency.value=500;nf.Q.value=.8;
+      ng.gain.setValueAtTime(.5,ctx.currentTime);ng.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.6);
+      ns.connect(nf);nf.connect(ng);ng.connect(master);ns.start();ns.stop(ctx.currentTime+.6);
+      /* Résonance grave */
+      const osc2=ctx.createOscillator(),g2=ctx.createGain();
+      osc2.type='triangle';osc2.frequency.value=80;
+      g2.gain.setValueAtTime(.6,ctx.currentTime);g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+3);
+      osc2.connect(g2);g2.connect(master);osc2.start();osc2.stop(ctx.currentTime+3);
+    }catch(e){}
+  }
+
+  /* === Globe holographique — continents en points + lignes d'arc === */
+  if(typeof THREE!=='undefined'){
+    const canvas=document.getElementById('loader-3d');
+    if(canvas){
+      const W=window.innerWidth,H=window.innerHeight;
+      canvas.width=W;canvas.height=H;
+      const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+      renderer.setSize(W,H);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+      const scene=new THREE.Scene();
+      const camera=new THREE.PerspectiveCamera(50,W/H,.1,100);
+      camera.position.z=3.8;
+      const R=1.5;
+
+      /* lat/lon → vecteur 3D */
+      function ll3(lat,lon,r=R){
+        const phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;
+        return new THREE.Vector3(-r*Math.sin(phi)*Math.cos(theta),r*Math.cos(phi),r*Math.sin(phi)*Math.sin(theta));
+      }
+
+      /* === Carte monde sur canvas mini → pixels terre === */
+      const MW=360,MH=180;
+      const mc=document.createElement('canvas');mc.width=MW;mc.height=MH;
+      const mg=mc.getContext('2d');
+      mg.fillStyle='#000';mg.fillRect(0,0,MW,MH);
+      mg.fillStyle='#fff';
+      const mp=(lon,lat)=>[(lon+180)/360*MW,(90-lat)/180*MH];
+      function dL(pts){mg.beginPath();mg.moveTo(...mp(...pts[0]));pts.slice(1).forEach(p=>mg.lineTo(...mp(...p)));mg.closePath();mg.fill();}
+      dL([[-17,15],[-17,4],[-10,-4],[9,-5],[12,-17],[14,-35],[24,-35],[32,-28],[40,-11],[42,12],[38,22],[32,30],[25,37],[12,38],[-5,36],[-6,22]]);
+      dL([[-9,36],[-9,44],[2,52],[5,54],[14,55],[18,60],[25,65],[28,70],[32,68],[28,60],[32,55],[28,44],[34,37],[28,35],[20,38],[12,44],[2,44]]);
+      dL([[5,58],[8,65],[14,70],[28,72],[30,70],[28,65],[18,60],[14,55],[12,56],[8,57],[5,58]]);
+      dL([[26,42],[36,52],[50,58],[60,72],[80,74],[100,72],[120,68],[140,72],[145,60],[135,35],[125,22],[105,4],[95,10],[80,8],[68,22],[56,24],[44,12],[38,22],[32,30]]);
+      dL([[68,22],[80,8],[77,8],[72,22],[68,22]]);
+      dL([[95,20],[100,15],[105,10],[110,4],[115,5],[120,4],[125,8],[120,15],[110,20],[100,20]]);
+      dL([[130,32],[135,35],[140,40],[143,44],[140,44],[135,35],[130,32]]);
+      dL([[-165,60],[-168,54],[-130,54],[-125,45],[-120,32],[-116,22],[-92,16],[-83,10],[-77,8],[-63,10],[-62,18],[-75,20],[-75,35],[-75,45],[-66,44],[-68,48],[-80,44],[-96,50],[-110,54],[-130,60],[-140,60]]);
+      dL([[-44,82],[-18,76],[-18,70],[-42,60],[-52,66],[-56,78]]);
+      dL([[-81,10],[-77,8],[-63,10],[-50,3],[-34,-4],[-35,-10],[-38,-17],[-39,-23],[-48,-28],[-52,-34],[-68,-56],[-74,-52],[-76,-45],[-75,-35],[-70,-18],[-76,-8],[-80,0],[-78,5]]);
+      dL([[114,-22],[118,-30],[122,-34],[130,-34],[138,-36],[148,-40],[150,-32],[153,-26],[148,-18],[136,-12],[130,-12],[122,-18]]);
+      dL([[-180,-65],[180,-65],[180,-90],[-180,-90]]);
+
+      /* Pixels terre → points 3D */
+      const imgD=mg.getImageData(0,0,MW,MH).data;
+      const dPos=[],dCol=[];
+      for(let y=0;y<MH;y++) for(let x=0;x<MW;x++){
+        if(imgD[(y*MW+x)*4]>128&&Math.random()<.65){
+          const lon=(x/MW)*360-180,lat=90-(y/MH)*180;
+          const v=ll3(lat,lon);dPos.push(v.x,v.y,v.z);
+          const r=Math.random();
+          if(r<.65){dCol.push(0,.85,.9);}
+          else if(r<.88){dCol.push(.05,.55,1);}
+          else{dCol.push(.7,1,1);}
+        }
+      }
+      const dGeo=new THREE.BufferGeometry();
+      dGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(dPos),3));
+      dGeo.setAttribute('color',new THREE.BufferAttribute(new Float32Array(dCol),3));
+      const dMat=new THREE.PointsMaterial({size:.016,transparent:true,opacity:0,vertexColors:true});
+      const dots=new THREE.Points(dGeo,dMat);dots.scale.set(0,0,0);scene.add(dots);
+
+      /* Sphère de base sombre */
+      const base=new THREE.Mesh(new THREE.SphereGeometry(R-.01,64,64),new THREE.MeshBasicMaterial({color:0x010d18,transparent:true,opacity:.97}));
+      base.scale.set(0,0,0);scene.add(base);
+
+
+      /* === Lignes d'arc animées (style Spline) === */
+      const CITIES=[[48,2],[35.6,139],[1,103],[-33.8,151],[40,-74],[19,-99],[55,37],[-23,-43],[31,121],[28,77],[-1,37],[4,114],[51,0],[-34,-58],[60,30]];
+      const ARC_COLORS=[0x00ffcc,0x0088ff,0xff3355,0xffaa00,0xff44ff,0x44ff88];
+      const arcs=[];
+
+      function makeArc(){
+        let a=Math.floor(Math.random()*CITIES.length),b=Math.floor(Math.random()*CITIES.length);
+        while(b===a)b=Math.floor(Math.random()*CITIES.length);
+        const s=ll3(CITIES[a][0],CITIES[a][1]);
+        const e=ll3(CITIES[b][0],CITIES[b][1]);
+        const mid=s.clone().add(e).multiplyScalar(.5).normalize().multiplyScalar(R*1.5);
+        const curve=new THREE.QuadraticBezierCurve3(s,mid,e);
+        const allPts=curve.getPoints(80);
+        const geo=new THREE.BufferGeometry();
+        const col=ARC_COLORS[Math.floor(Math.random()*ARC_COLORS.length)];
+        const mat=new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.9});
+        const line=new THREE.Line(geo,mat);
+        scene.add(line);
+        return{line,geo,allPts,prog:0,growing:true,mat};
+      }
+      for(let i=0;i<10;i++) arcs.push(makeArc());
+
+      /* Burst */
+      const bGeo=new THREE.BufferGeometry();
+      const BN=400,bPos=new Float32Array(BN*3),bVel=[];
+      for(let j=0;j<BN;j++){bPos[j*3]=0;bPos[j*3+1]=0;bPos[j*3+2]=0;bVel.push([(Math.random()-.5)*5,(Math.random()-.5)*5,(Math.random()-.5)*5]);}
+      bGeo.setAttribute('position',new THREE.BufferAttribute(bPos,3));
+      const bMat=new THREE.PointsMaterial({color:0x00ffcc,size:.05,transparent:true,opacity:1});
+      scene.add(new THREE.Points(bGeo,bMat));
+
+      let alive=true;const ST=Date.now();const RISE=1800;
+
+      (function anim(){
+        if(!alive)return;requestAnimationFrame(anim);
+        const elapsed=Date.now()-ST,t=Math.min(elapsed/RISE,1);
+        const eas=t===1?1:1-Math.pow(2,-10*t)*Math.cos((t*10-.75)*(2*Math.PI)/3);
+
+        base.scale.set(eas,eas,eas);dots.scale.set(eas,eas,eas);
+        dMat.opacity=eas*.92;
+
+        /* Burst */
+        if(t<.5){
+          const bp=bGeo.attributes.position.array;
+          for(let j=0;j<BN;j++){bp[j*3]+=bVel[j][0]*.04*(1-t);bp[j*3+1]+=bVel[j][1]*.04*(1-t);bp[j*3+2]+=bVel[j][2]*.04*(1-t);}
+          bGeo.attributes.position.needsUpdate=true;bMat.opacity=Math.max(0,1-t/.5);
+        }else{bMat.opacity=0;}
+
+        /* Arcs */
+        if(t>.35){
+          arcs.forEach((arc,idx)=>{
+            if(arc.growing){
+              arc.prog=Math.min(arc.prog+.007,1);
+              arc.geo.setFromPoints(arc.allPts.slice(0,Math.max(2,Math.ceil(arc.prog*arc.allPts.length))));
+              if(arc.prog>=1)arc.growing=false;
+            }else{
+              arc.mat.opacity=Math.max(0,arc.mat.opacity-.004);
+              if(arc.mat.opacity<=0){scene.remove(arc.line);const na=makeArc();arcs[idx]=na;}
+            }
+          });
+        }
+
+        const spd=.003+.015*(1-eas);
+        dots.rotation.y+=spd;base.rotation.y+=spd;
+        renderer.render(scene,camera);
+      })();
+
+      setTimeout(playGlobeSound,200);
+      loader._killGlobe=()=>{alive=false;renderer.dispose();};
+    }
+  }
+
+  /* Clic → voyage spatial 3D → site */
+  function startSite(){
+    if(loader._killGlobe) loader._killGlobe();
+    loader.classList.add('hide');
+    setTimeout(()=>loader.remove(),900);
+    /* Déclenche l'écran arbre */
+    setTimeout(()=>window.dispatchEvent(new CustomEvent('startTree')),400);
+  }
+
+  loader.addEventListener('click',startSite);
+  document.addEventListener('keydown',function k(e){
+    if(e.key===' '||e.key==='Enter'){startSite();document.removeEventListener('keydown',k);}
+  });
+})();
+
+/* --- Bouton RE-ENTER --- */
+const reenterBtn=document.getElementById('btn-reenter');
+if(reenterBtn)reenterBtn.addEventListener('click',()=>window.location.reload());
+
 /* --- Cursor --- */
 const cursor=document.getElementById('cursor');
 const ring=document.getElementById('cursor-ring');
 let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY;
-  cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';
-});
-(function animRing(){
+const finePointer=window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+let ringRunning=false;
+function animRing(){
   rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
   ring.style.left=rx-18+'px';ring.style.top=ry-18+'px';
-  requestAnimationFrame(animRing);
-})();
+  /* la boucle s'arrête quand l'anneau a rejoint la souris */
+  if(Math.abs(mx-rx)>.3||Math.abs(my-ry)>.3)requestAnimationFrame(animRing);
+  else ringRunning=false;
+}
+if(finePointer){
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';
+    if(!ringRunning){ringRunning=true;requestAnimationFrame(animRing);}
+  },{passive:true});
+}
 document.querySelectorAll('a,button,.project-card,.map-card,.service-card').forEach(el=>{
   el.addEventListener('mouseenter',()=>{cursor.style.transform='scale(2.5)';ring.style.transform='scale(1.5)'});
   el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';ring.style.transform='scale(1)'});
 });
+
+/* --- Read progress bar --- */
+const readProgress=document.getElementById('read-progress');
+window.addEventListener('scroll',()=>{
+  const scrolled=window.scrollY;
+  const total=document.documentElement.scrollHeight-window.innerHeight;
+  readProgress.style.width=(total>0?(scrolled/total*100):0)+'%';
+},{passive:true});
+
+/* --- Hero bio phrase fade-in --- */
+(function(){
+  const phrases=document.querySelectorAll('.bio-phrase');
+  const delays=[200,400,600];
+  phrases.forEach((el,i)=>{
+    setTimeout(()=>el.classList.add('visible'), delays[i]||i*200);
+  });
+})();
+
+/* --- Hero heatmap canvas --- */
+const hCanvas=document.getElementById('heatmap-canvas');
+if(hCanvas){
+  const hCtx=hCanvas.getContext('2d');
+  function resizeHeat(){
+    hCanvas.width=hCanvas.offsetWidth;
+    hCanvas.height=hCanvas.offsetHeight;
+  }
+  resizeHeat();
+  window.addEventListener('resize',resizeHeat);
+  const hotspots=Array.from({length:12},()=>({
+    x:Math.random(),y:Math.random(),
+    r:Math.random()*150+80,
+    vx:(Math.random()-.5)*.001,
+    vy:(Math.random()-.5)*.001,
+    hue:Math.random()>.5?174:200
+  }));
+  function drawHeat(){
+    hCtx.clearRect(0,0,hCanvas.width,hCanvas.height);
+    hotspots.forEach(h=>{
+      h.x+=h.vx;h.y+=h.vy;
+      if(h.x<0||h.x>1)h.vx*=-1;
+      if(h.y<0||h.y>1)h.vy*=-1;
+      const grd=hCtx.createRadialGradient(
+        h.x*hCanvas.width,h.y*hCanvas.height,0,
+        h.x*hCanvas.width,h.y*hCanvas.height,h.r
+      );
+      grd.addColorStop(0,`hsla(${h.hue},100%,60%,0.4)`);
+      grd.addColorStop(1,`hsla(${h.hue},100%,60%,0)`);
+      hCtx.fillStyle=grd;
+      hCtx.beginPath();
+      hCtx.arc(h.x*hCanvas.width,h.y*hCanvas.height,h.r,0,Math.PI*2);
+      hCtx.fill();
+    });
+    if(heatVisible)requestAnimationFrame(drawHeat);else heatRunning=false;
+  }
+  let heatVisible=true,heatRunning=false;
+  new IntersectionObserver(es=>{
+    heatVisible=es[0].isIntersecting;
+    if(heatVisible&&!heatRunning){heatRunning=true;requestAnimationFrame(drawHeat);}
+  }).observe(hCanvas);
+}
+
+/* --- Live GPS coords --- */
+const baseCoords={lat:43.2965,lng:5.3698};
+function animateCoords(){
+  const noise=()=>(Math.random()-.5)*.0002;
+  const lat=(baseCoords.lat+noise()).toFixed(4);
+  const lng=(baseCoords.lng+noise()).toFixed(4);
+  const el=document.getElementById('floating-coords');
+  if(el) el.innerHTML=`${lat}° N<br>${lng}° E<br>Marseille, FR`;
+}
+setInterval(animateCoords,2000);
 
 /* --- Live clock --- */
 function updateClock(){
@@ -1320,6 +2566,82 @@ const sb=new IntersectionObserver((entries)=>{
 },{threshold:.4});
 skillBars.forEach(b=>{b.style.transformOrigin='left';sb.observe(b)});
 
+/* --- Parcours map --- */
+document.addEventListener('DOMContentLoaded',function(){
+  const parcoursEl=document.getElementById('parcours-map');
+  if(!parcoursEl||typeof L==='undefined')return;
+  const parcoursMap=L.map('parcours-map',{
+    scrollWheelZoom:false,zoomControl:false,
+    dragging:false,touchZoom:false,doubleClickZoom:false,
+    boxZoom:false,keyboard:false,tap:false
+  });
+  parcoursMap.attributionControl.setPrefix(false);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+    maxZoom:16,attribution:'Tiles &copy; Esri'
+  }).addTo(parcoursMap);
+  const villes=[
+    {nom:"Daloa, Côte d'Ivoire",coords:[6.877,-6.450]},
+    {nom:'Aix-Marseille',       coords:[43.296,5.370]},
+    {nom:'Lyon — CLB',          coords:[45.748,4.847]}
+  ];
+  villes.forEach(v=>{
+    L.circleMarker(v.coords,{
+      radius:6,color:'#00c8b4',
+      fillColor:'#00c8b4',fillOpacity:1
+    }).bindTooltip(v.nom).addTo(parcoursMap);
+  });
+  const line=L.polyline(villes.map(v=>v.coords),{
+    color:'#00c8b4',weight:2,
+    dashArray:'6,8',className:'parcours-line'
+  }).addTo(parcoursMap);
+  const fit=()=>{parcoursMap.invalidateSize();parcoursMap.fitBounds(line.getBounds(),{padding:[24,24]});};
+  fit();
+  /* Recale la carte quand elle devient visible ou que la fenêtre change de taille */
+  new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)fit();})).observe(parcoursEl);
+  let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(fit,200);});
+});
+
+/* --- Stats table count-up --- */
+(function(){
+  const table=document.querySelector('.stats-table');
+  if(!table)return;
+  const rows=table.querySelectorAll('tbody tr');
+  /* définition des cellules : ligne, colonne, valeur cible, format d'affichage */
+  const cells=[
+    {row:0,col:1,to:2, fmt:n=>n+' ans'},
+    {row:0,col:2,to:4, fmt:n=>String(n)},
+    {row:1,col:1,to:1, fmt:n=>n+' an'},
+    {row:1,col:2,to:2, fmt:n=>String(n)},
+    {row:2,col:1,to:3, fmt:n=>n+' ans'},
+    {row:2,col:2,to:4, fmt:n=>String(n)},
+  ];
+  let done=false;
+
+  function countUp(){
+    if(done)return;
+    done=true;
+    const DURATION=2000;
+    const start=performance.now();
+    function tick(now){
+      const elapsed=now-start;
+      const progress=Math.min(elapsed/DURATION,1);
+      /* ease-out cubique */
+      const ease=1-Math.pow(1-progress,3);
+      cells.forEach(({row,col,to,fmt})=>{
+        const td=rows[row]&&rows[row].cells[col];
+        if(td) td.textContent=fmt(Math.round(ease*to));
+      });
+      if(progress<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting)countUp()});
+  },{threshold:.4});
+  obs.observe(table);
+})();
+
 /* --- Project filter --- */
 document.querySelectorAll('.filter-btn').forEach(btn=>{
   btn.addEventListener('click',function(){
@@ -1334,7 +2656,109 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
 
 /* --- Gallery build --- */
 const BASE="assets/cartes/";
-const FILES=[
+const MAPS=[
+  {
+    file:"CARTE DE CAH.png",
+    title:"Carte de CAH — Classification Ascendante Hiérarchique",
+    desc:"Classification Ascendante Hiérarchique appliquée à des données géographiques — regroupement et analyse typologique des territoires.",
+    tags:["QGIS","SIG","Statistiques","Classification","CAH"]
+  },
+  {
+    file:"carte_bivariee_eepatho.png",
+    title:"Carte Bivariée — Analyse Spatiale",
+    desc:"Cartographie bivariée croisant deux variables spatiales pour révéler des corrélations territoriales.",
+    tags:["QGIS","SIG","Cartographie bivariée","Analyse spatiale"]
+  },
+  {
+    file:"bati_commune_cocody.png",
+    title:"Bâti de la Commune de Cocody",
+    desc:"Cartographie du tissu bâti de la commune de Cocody (Abidjan) — densité et structure urbaine.",
+    tags:["QGIS","SIG","Cartographie urbaine","Shapefile"]
+  },
+  {
+    file:"acces_au soin.png",
+    title:"Accès aux Soins Oncologiques — France",
+    desc:"Analyse spatiale de l'accessibilité aux centres de traitement oncologique en France — disparités territoriales et zones sous-dotées.",
+    tags:["QGIS","SIG","Santé","Oncologie","Analyse spatiale"]
+  },
+  {
+    file:"CIV_3.png",
+    title:"Carte de la Côte d'Ivoire",
+    desc:"Cartographie thématique de la Côte d'Ivoire — représentation géographique et données territoriales.",
+    tags:["QGIS","SIG","Afrique","Côte d'Ivoire"]
+  },
+  {
+    file:"afrique_esperance_vie_ENG.png",
+    title:"Espérance de Vie en Afrique",
+    desc:"Cartographie de l'espérance de vie à la naissance par pays africain — disparités et tendances régionales.",
+    tags:["QGIS","SIG","Afrique","Santé","Dataviz"]
+  },
+  {
+    file:"afrique_ouest_artnouveau_ENG.png",
+    title:"Afrique de l'Ouest — Style Art Nouveau",
+    desc:"Carte stylisée de l'Afrique de l'Ouest avec une esthétique Art Nouveau — cartographie artistique.",
+    tags:["QGIS","SIG","Afrique","Cartographie artistique"]
+  },
+  {
+    file:"afrique_pib_ENG.png",
+    title:"PIB des Pays d'Afrique",
+    desc:"Cartographie du produit intérieur brut par pays africain — analyse des inégalités économiques.",
+    tags:["QGIS","SIG","Afrique","Économie","Dataviz"]
+  },
+  {
+    file:"asie_population_ENG.png",
+    title:"Population en Asie",
+    desc:"Cartographie de la densité et de la répartition de la population à travers le continent asiatique.",
+    tags:["QGIS","SIG","Asie","Démographie","Dataviz"]
+  },
+  {
+    file:"corse_layout_pro.png",
+    title:"Carte de la Corse — Layout Professionnel",
+    desc:"Mise en page cartographique professionnelle de la Corse avec habillage complet.",
+    tags:["QGIS","SIG","France","Layout","Cartographie"]
+  },
+  {
+    file:"esperance_vie_monde_ENG.png",
+    title:"Espérance de Vie dans le Monde",
+    desc:"Cartographie mondiale de l'espérance de vie — comparaison internationale et disparités géographiques.",
+    tags:["QGIS","SIG","Monde","Santé","Dataviz"]
+  },
+  {
+    file:"europe_pib_ENG.png",
+    title:"PIB des Pays d'Europe",
+    desc:"Cartographie du produit intérieur brut par pays européen — analyse des inégalités économiques en Europe.",
+    tags:["QGIS","SIG","Europe","Économie","Dataviz"]
+  },
+  {
+    file:"france_2020.png",
+    title:"France 2020 — Carte Thématique",
+    desc:"Cartographie thématique de la France métropolitaine, données 2020.",
+    tags:["QGIS","SIG","France","Cartographie thématique"]
+  },
+  {
+    file:"france_elegante.png",
+    title:"France Élégante — Style Minimaliste",
+    desc:"Carte de France au style épuré et élégant — cartographie minimaliste de haute qualité visuelle.",
+    tags:["QGIS","SIG","France","Design","Cartographie artistique"]
+  },
+  {
+    file:"france_hexbin_geo_ENG.png",
+    title:"France — Carte Hexbin Géographique",
+    desc:"Représentation hexagonale géographique de la France — alternative innovante à la choroplèthe classique.",
+    tags:["QGIS","SIG","France","Hexbin","Dataviz"]
+  },
+  {
+    file:"france_stylee_ENG.png",
+    title:"France Stylisée",
+    desc:"Carte de France avec un rendu graphique stylisé et soigné.",
+    tags:["QGIS","SIG","France","Design","Cartographie"]
+  },
+  {
+    file:"pyrenees_layout_pro.png",
+    title:"Pyrénées — Layout Professionnel",
+    desc:"Mise en page cartographique professionnelle des Pyrénées avec habillage complet.",
+    tags:["QGIS","SIG","France","Montagne","Layout"]
+  },
   "carte de localisation lyon et fond.png",
   "carte de localisation yamal.png",
   "carte de relation NDVI_TPS_NDBI.png",
@@ -1352,19 +2776,27 @@ const FILES=[
 ];
 const gallery=document.getElementById('gallery-cartes');
 if(gallery){
-  FILES.forEach(name=>{
-    const src=BASE+encodeURIComponent(name).replace(/%2F/g,'/');
-    const title=name.replace(/\.[^.]+$/,'').replace(/[_\-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+  MAPS.forEach(entry=>{
+    const isRich=typeof entry==='object';
+    const name=isRich?entry.file:entry;
+    const enc=encodeURIComponent(name.replace(/\.[^.]+$/,''));
+    const orig=BASE+encodeURIComponent(name);
+    const src=BASE+'thumbs/'+enc+'.webp';
+    const hd=BASE+'hd/'+enc+'.webp';
+    const title=isRich?entry.title:name.replace(/\.[^.]+$/,'').replace(/[_\-]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+    const desc=isRich?entry.desc:`PNG · ${name.split('.')[0]}`;
+    const tagsHtml=isRich&&entry.tags?`<div class="map-card-tags">${entry.tags.map(t=>`<span class="map-card-tag">${t}</span>`).join('')}</div>`:'';
     const card=document.createElement('div');
     card.className='map-card';
     card.innerHTML=`
-      <img src="${src}" alt="${title}" loading="lazy" onerror="this.parentElement.style.display='none'">
+      <img src="${src}" alt="${title}" loading="lazy" decoding="async" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='${orig}'}else{this.parentElement.style.display='none'}">
       <div class="map-card-body">
         <h4>${title}</h4>
-        <p>PNG · ${name.split('.')[0]}</p>
+        <p>${desc}</p>
+        ${tagsHtml}
       </div>
     `;
-    card.addEventListener('click',()=>openModal(src,title));
+    card.addEventListener('click',()=>openModal(hd,title,orig));
     gallery.appendChild(card);
   });
 }
@@ -1382,7 +2814,8 @@ const overlay=document.getElementById('modal-overlay');
 const modalImg=document.getElementById('modal-img');
 const modalTitle=document.getElementById('modal-title');
 const modalClose=document.getElementById('modal-close');
-function openModal(src,title){
+function openModal(src,title,fallback){
+  modalImg.onerror=fallback?()=>{modalImg.onerror=null;modalImg.src=fallback;}:null;
   modalImg.src=src;modalTitle.textContent=title;
   overlay.style.display='flex';document.body.style.overflow='hidden';
 }
@@ -1396,7 +2829,7 @@ const themeToggle=document.getElementById('theme-toggle');
 function applyTheme(mode){
   const isLight=mode==='light';
   document.body.classList.toggle('light',isLight);
-  if(themeToggle) themeToggle.textContent=isLight?'☀️':'🌙';
+  if(themeToggle) themeToggle.innerHTML=isLight?'☀️':'<i class="fi fi-rr-moon-stars"></i>';
   try{localStorage.setItem('theme',mode);}catch(e){}
 }
 function autoTheme(){
@@ -1412,6 +2845,132 @@ if(themeToggle){
   });
 }
 
+/* --- Auto-scroll galerie cartes --- */
+(function(){
+  if(!gallery)return;
+  const SPEED=0.6;
+  let paused=false;
+  let userStopped=false;   /* true quand l'utilisateur a cliqué pause */
+
+  const ppBtn=document.getElementById('gallery-playpause');
+
+  function setIcon(){
+    if(!ppBtn)return;
+    ppBtn.innerHTML=userStopped
+      ?'<i class="bx bx-play"></i>'
+      :'<i class="bx bx-pause"></i>';
+  }
+
+  if(ppBtn){
+    ppBtn.addEventListener('click',()=>{
+      userStopped=!userStopped;
+      paused=userStopped;
+      setIcon();
+    });
+  }
+
+  let galleryVisible=false,galleryRunning=false;
+  new IntersectionObserver(es=>{
+    galleryVisible=es[0].isIntersecting;
+    if(galleryVisible&&!galleryRunning){galleryRunning=true;requestAnimationFrame(step);}
+  }).observe(gallery);
+
+  function step(){
+    if(!galleryVisible){galleryRunning=false;return;}
+    if(!paused){
+      gallery.scrollLeft+=SPEED;
+      if(gallery.scrollLeft>=gallery.scrollWidth-gallery.clientWidth){
+        gallery.scrollLeft=0;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  gallery.addEventListener('mouseenter',()=>{if(!userStopped)paused=true});
+  gallery.addEventListener('mouseleave',()=>{if(!userStopped)paused=false});
+  gallery.addEventListener('touchstart',()=>{if(!userStopped)paused=true},{passive:true});
+  gallery.addEventListener('touchend',  ()=>{if(!userStopped)paused=false},{passive:true});
+})();
+
+
+/* --- Hero Leaflet map --- */
+window.addEventListener('load',function(){
+  const mapEl=document.getElementById('hero-map');
+  if(!mapEl||typeof L==='undefined')return;
+
+  const map=L.map('hero-map',{
+    center:[43.2965,5.3698],
+    zoom:11,
+    scrollWheelZoom:true,
+    zoomControl:false,
+    attributionControl:false
+  });
+  L.control.zoom({position:'bottomright'}).addTo(map);
+
+  /* Tiles Stadia Dark */
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+    maxZoom:16
+  }).addTo(map);
+
+  /* Marker pulsant custom */
+  const icon=L.divIcon({
+    className:'',
+    html:`
+      <div style="position:relative;width:36px;height:36px;">
+        <div style="
+          position:absolute;inset:0;border-radius:50%;
+          border:2px solid rgba(0,200,180,.7);
+          animation:markerPulse 2s ease-out infinite;
+        "></div>
+        <div style="
+          position:absolute;top:50%;left:50%;
+          transform:translate(-50%,-50%);
+          width:12px;height:12px;border-radius:50%;
+          background:#00c8b4;
+          border:2px solid #fff;
+          box-shadow:0 0 10px rgba(0,200,180,.9);
+        "></div>
+      </div>`,
+    iconSize:[36,36],iconAnchor:[18,18],popupAnchor:[0,-20]
+  });
+
+  L.marker([43.2965,5.3698],{icon})
+    .addTo(map)
+    .bindPopup(`<span style="font-family:'Space Mono',monospace">📍 Erwan N'Guessan · Marseille, FR</span>`)
+    .openPopup();
+
+  /* Coordonnées en overlay */
+  const coordsDiv=document.createElement('div');
+  coordsDiv.className='map-coords-overlay';
+  coordsDiv.textContent='43.2965° N · 5.3698° E';
+  mapEl.parentElement.appendChild(coordsDiv);
+});
+
+/* --- Hero parallax --- */
+(function(){
+  const visual  = document.querySelector('.hero-visual');
+  const rings   = document.querySelector('.topo-rings');
+  const hero    = document.getElementById('hero');
+  const FACTOR  = 0.3;   /* 0.4x vitesse → décalage relatif de 0.3x scrollY */
+  let ticking   = false;
+
+  function applyParallax(){
+    const y = window.scrollY;
+    if(hero && y > hero.offsetHeight) return;
+    const offset = y * FACTOR;
+    /* vidéo statique — parallax uniquement sur les anneaux topo */
+    if(rings) rings.style.transform = `translateY(calc(-50% + ${offset}px))`;
+    ticking = false;
+  }
+
+  window.addEventListener('scroll', ()=>{
+    if(!ticking){
+      requestAnimationFrame(applyParallax);
+      ticking = true;
+    }
+  }, {passive:true});
+})();
+
 /* --- Mobile nav toggle --- */
 const toggle=document.getElementById('nav-toggle');
 const navMenu=document.querySelector('.nav-links');
@@ -1426,18 +2985,475 @@ if(toggle&&navMenu){
     navMenu.style.padding='2rem';
     navMenu.style.borderBottom='1px solid rgba(0,200,180,.15)';
   });
+  /* Ferme le menu après un clic sur un lien, et le réinitialise en repassant en desktop */
+  navMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+    if(window.innerWidth<=900)navMenu.style.display='none';
+  }));
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)navMenu.removeAttribute('style');});
 }
 
 /* --- Nav active link on scroll --- */
 const sections=document.querySelectorAll('section[id]');
 const links=document.querySelectorAll('.nav-links a');
+let navTick=false;
 window.addEventListener('scroll',()=>{
-  let cur='';
-  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120)cur=s.id});
-  links.forEach(l=>{
-    l.style.color=l.getAttribute('href')==='#'+cur?'var(--accent)':'';
+  if(navTick)return;navTick=true;
+  requestAnimationFrame(()=>{
+    navTick=false;
+    let cur='';
+    const y=window.scrollY;
+    sections.forEach(s=>{if(y>=s.offsetTop-120)cur=s.id});
+    links.forEach(l=>{
+      l.style.color=l.getAttribute('href')==='#'+cur?'var(--accent)':'';
+    });
+  });
+},{passive:true});
+/* --- Particles.js --- */
+const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const smallScreen=window.innerWidth<900;
+if(typeof particlesJS!=='undefined'&&!reduceMotion){
+  particlesJS('particles-js',{
+    particles:{
+      number:{value:smallScreen?28:60,density:{enable:true,value_area:900}},
+      color:{value:'#00c8b4'},
+      opacity:{value:.35,random:true},
+      size:{value:2.5,random:true,anim:{enable:true,speed:1,size_min:.5}},
+      line_linked:{enable:true,distance:140,color:'#00c8b4',opacity:.12,width:1},
+      move:{
+        enable:true,speed:1,direction:'none',random:true,
+        straight:false,out_mode:'out',
+        repulse:{enable:true,distance:80,duration:.4}
+      }
+    },
+    interactivity:{
+      detect_on:'canvas',
+      events:{onhover:{enable:true,mode:'repulse'},onclick:{enable:false},resize:true},
+      modes:{repulse:{distance:80,duration:.4}}
+    },
+    retina_detect:false
+  });
+}
+</script>
+
+
+<!-- ============================================================
+     TREE TRANSITION (Three.js r128 global)
+============================================================ -->
+<script>
+(function(){
+
+/* ---- SHADERS compatibles GLSL 1.0 / Three.js r128 ---- */
+const leavesVS=`
+  uniform sampler2D uNoiseMap;
+  uniform vec3 uBoxMin,uBoxSize,uRaycast;
+  uniform float uTime;
+  varying vec3 vObjectPos,vNormal,vWorldNormal;
+  varying float vCloseToGround;
+  vec4 getTriplanar(sampler2D tex){
+    vec4 x=texture2D(tex,(vObjectPos.xy+uTime)/3.);
+    vec4 y=texture2D(tex,(vObjectPos.yz+uTime)/3.);
+    vec4 z=texture2D(tex,(vObjectPos.zx+uTime)/3.);
+    vec4 c=(x+y+z)/6.;c.xyz*=vObjectPos;return c;
+  }
+  void main(){
+    mat4 md=mat4(1.);
+    vec3 wp=vec3(modelMatrix*instanceMatrix*md*vec4(position,1.));
+    vCloseToGround=clamp(wp.y,0.,1.);
+    float off=clamp(.8-distance(uRaycast,instanceMatrix[3].xyz),0.,999.);
+    off=(pow(off,.8)/2.)*vCloseToGround;
+    md[3].xyz=vec3(off);
+    vNormal=normalMatrix*mat3(instanceMatrix)*mat3(md)*normalize(normal);
+    vWorldNormal=vec3(modelMatrix*instanceMatrix*md*vec4(normal,0.));
+    vObjectPos=((wp-uBoxMin)*2.)/uBoxSize-vec3(1.);
+    vec4 no=getTriplanar(uNoiseMap)*vCloseToGround;
+    vec4 np=instanceMatrix*md*vec4(position,1.);
+    np.xyz+=no.xyz;
+    gl_Position=projectionMatrix*modelViewMatrix*np;
+  }`;
+const leavesFS=`
+  #include <common>
+  #include <lights_pars_begin>
+  uniform vec3 uColorA,uColorB,uColorC;
+  uniform float uTime;
+  varying vec3 vObjectPos,vNormal,vWorldNormal;
+  varying float vCloseToGround;
+  vec3 mix3(vec3 a,vec3 b,vec3 c,float f){
+    return f>.7?mix(b,c,(f-.5)*2.):mix(a,b,f*2.);
+  }
+  float getPosColors(){
+    float p=smoothstep(.2,.8,distance(vec3(0.),vObjectPos));
+    return p*(-(vWorldNormal.g/2.)+.5)*(-vObjectPos.y/9.+.5);
+  }
+  float getDiffuse(){
+    float intensity=0.;
+    #if NUM_DIR_LIGHTS > 0
+    for(int d=0;d<NUM_DIR_LIGHTS;d++){
+      intensity=dot(directionalLights[d].direction,vNormal);
+      intensity=smoothstep(.55,1.,intensity)*.2+pow(smoothstep(.55,1.,intensity),.5);
+    }
+    #endif
+    return intensity;
+  }
+  void main(){
+    float g=(getPosColors()+getDiffuse())*vCloseToGround/2.;
+    vec4 c=vec4(mix3(uColorA,uColorB,uColorC,g),1.);
+    gl_FragColor=vec4(pow(c.xyz,vec3(.454545)),c.w);
+  }`;
+
+/* ---- COMPÉTENCES ---- */
+const SKILLS_L=[
+  {label:'Compétence 01',name:'Télédétection'},
+  {label:'Compétence 02',name:'Analyse Spatiale'},
+  {label:'Compétence 03',name:'Web SIG'},
+  {label:'Compétence 04',name:'Python'},
+  {label:'Compétence 05',name:'Géomatique'},
+];
+const SKILLS_R=[
+  {label:'Outil 01',name:'PostgreSQL'},
+  {label:'Outil 02',name:'Modélisation 3D'},
+  {label:'Outil 03',name:'PostGIS'},
+  {label:'Outil 04',name:'ArcGIS Pro'},
+];
+const SKILL_DUR=950; /* ms par paire → 5×950 = ~4.75s total */
+
+/* ---- INIT SCÈNE ---- */
+const ts=document.getElementById('ts-screen');
+const container=document.getElementById('ts-tree-container');
+const skillLabel=document.getElementById('ts-skill-label');
+const skillName=document.getElementById('ts-skill-name');
+const skillLabelR=document.getElementById('ts-skill-label-r');
+const skillNameR=document.getElementById('ts-skill-name-r');
+const btn=document.getElementById('ts-btn');
+
+const scene=new THREE.Scene();
+const loader2=new THREE.GLTFLoader();
+const camera=new THREE.PerspectiveCamera(35,window.innerWidth/window.innerHeight,.001,1000);
+const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+const dummy=new THREE.Object3D();
+const matrix=new THREE.Matrix4();
+const pointer=new THREE.Vector2();
+const raycaster=new THREE.Raycaster();
+const dlight=new THREE.DirectionalLight(0xcccccc,1.8);
+const tree={group:new THREE.Group()};
+const noiseMap=new THREE.TextureLoader().load('assets/vendor/tree/noise.png');
+const poleTexture=new THREE.TextureLoader().load('assets/vendor/tree/texture.jpg');
+const rayPlane=new THREE.Mesh(new THREE.PlaneGeometry(100,100,1,1),undefined);
+
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const leavesMat=new THREE.ShaderMaterial({
+  lights:true,side:THREE.DoubleSide,
+  uniforms:{
+    ...THREE.UniformsLib.lights,
+    uTime:{value:0.},
+    uColorA:{value:new THREE.Color(0xb45252)},
+    uColorB:{value:new THREE.Color(0xd3a068)},
+    uColorC:{value:new THREE.Color(0xede19e)},
+    uBoxMin:{value:new THREE.Vector3(0,0,0)},
+    uBoxSize:{value:new THREE.Vector3(10,10,10)},
+    uRaycast:{value:new THREE.Vector3(0,0,0)},
+    uNoiseMap:{value:noiseMap},
+  },
+  vertexShader:leavesVS,fragmentShader:leavesFS
+});
+
+/* Chargement GLB */
+/* local d'abord (rapide en ligne) ; repli GitHub si le fichier local est bloqué (ouverture en file://) */
+const TREE_REMOTE='https://raw.githubusercontent.com/ceramicSoda/treeshader/main/assets/tree.glb';
+function onTreeLoaded(obj){
+  tree.pole=obj.scene.getObjectByName('Pole');
+  tree.pole.material=new THREE.MeshToonMaterial({map:tree.pole.material.map});
+  tree.crown=obj.scene.getObjectByName('Leaves');
+  tree.bbox=new THREE.Box3().setFromObject(tree.crown);
+  leavesMat.uniforms.uBoxMin.value.copy(tree.bbox.min);
+  leavesMat.uniforms.uBoxSize.value.copy(tree.bbox.getSize(new THREE.Vector3()));
+  tree.leavesCount=tree.crown.geometry.attributes.position.count;
+  tree.deadID=[];
+  tree.leafGeometry=obj.scene.getObjectByName('Leaf').geometry;
+  tree.leaves=new THREE.InstancedMesh(tree.leafGeometry,leavesMat,tree.leavesCount);
+  for(let i=0;i<tree.leavesCount;i++){
+    dummy.position.x=tree.crown.geometry.attributes.position.array[i*3];
+    dummy.position.y=tree.crown.geometry.attributes.position.array[i*3+1];
+    dummy.position.z=tree.crown.geometry.attributes.position.array[i*3+2];
+    dummy.lookAt(dummy.position.x+tree.crown.geometry.attributes.normal.array[i*3],
+                 dummy.position.y+tree.crown.geometry.attributes.normal.array[i*3+1],
+                 dummy.position.z+tree.crown.geometry.attributes.normal.array[i*3+2]);
+    dummy.scale.setScalar(Math.random()*.2+.8);
+    dummy.updateMatrix();
+    tree.leaves.setMatrixAt(i,dummy.matrix);
+  }
+  tree.group.add(tree.pole,tree.leaves);
+  for(let i=0;i<24;i++) tree.deadID.push(Math.floor(Math.random()*tree.leavesCount));
+}
+loader2.load('assets/vendor/tree/tree.glb',onTreeLoaded,undefined,()=>{
+  loader2.load(TREE_REMOTE,onTreeLoaded,undefined,e=>console.warn('tree load error',e));
+});
+
+dlight.position.set(3,6,-3);dlight.lookAt(0,2.4,0);
+rayPlane.visible=false;
+camera.position.set(-7,1,-12);
+controls.target=new THREE.Vector3(0,2.4,0);
+controls.maxPolarAngle=Math.PI*.5;
+controls.enableDamping=true;
+controls.autoRotate=true;
+controls.enablePan=false;
+controls.touches={TWO:THREE.TOUCH.ROTATE};
+scene.add(dlight,tree.group,rayPlane);
+noiseMap.wrapS=noiseMap.wrapT=THREE.RepeatWrapping;
+
+/* Boucle */
+let treeAlive=false;
+function animate(){
+  if(!treeAlive)return;
+  requestAnimationFrame(animate);
+  leavesMat.uniforms.uTime.value+=.01;
+  if(tree.deadID&&tree.leaves){
+    tree.deadID=tree.deadID.map(i=>{
+      tree.leaves.getMatrixAt(i,matrix);
+      matrix.decompose(dummy.position,dummy.rotation,dummy.scale);
+      if(dummy.position.y>0){
+        dummy.position.y-=.04;
+        dummy.position.x+=Math.random()/5-.11;
+        dummy.position.z+=Math.random()/5-.11;
+        dummy.rotation.x+=.2;
+        dummy.updateMatrix();
+        tree.leaves.setMatrixAt(i,dummy.matrix);
+        return i;
+      }
+    });
+    tree.leaves.instanceMatrix.needsUpdate=true;
+  }
+  controls.update();
+  renderer.render(scene,camera);
+}
+/* la boucle démarre au déclenchement de l'écran arbre (voir startTree) */
+
+/* Feuilles aléatoires */
+function killRandom(){
+  if(!treeAlive)return;
+  if(tree.deadID&&tree.leavesCount)
+    tree.deadID.push(Math.floor(Math.random()*tree.leavesCount));
+  setTimeout(killRandom,Math.random()*1500);
+}
+
+/* Interaction souris + tactile sur l'arbre */
+function handleTreePointer(clientX, clientY, burst){
+  pointer.set((clientX/window.innerWidth)*2-1,-(clientY/window.innerHeight)*2+1);
+  raycaster.setFromCamera(pointer,camera);
+  const hits=raycaster.intersectObjects([...(tree.leaves?[tree.leaves]:[]),rayPlane]);
+  if(hits[0]){
+    rayPlane.position.copy(hits[0].point).multiplyScalar(.9);
+    rayPlane.lookAt(camera.position);
+    leavesMat.uniforms.uRaycast.value=hits[0].point;
+    if(tree.leaves){
+      const count=burst?5:( Math.random()*5>3?1:0 );
+      for(let i=0;i<count;i++) tree.deadID.push(hits[0].instanceId);
+    }
+  }
+}
+const onTreeMove=e=>{if(treeAlive)handleTreePointer(e.clientX,e.clientY,false)};
+document.addEventListener('mousemove',onTreeMove);
+/* Touch : glisser le doigt sur l'arbre fait tomber les feuilles */
+document.addEventListener('touchmove',e=>{
+  if(!treeAlive)return;
+  const t=e.touches[0];
+  handleTreePointer(t.clientX,t.clientY,false);
+},{passive:true});
+document.addEventListener('touchstart',e=>{
+  if(!treeAlive)return;
+  const t=e.touches[0];
+  handleTreePointer(t.clientX,t.clientY,true); /* burst au tap */
+},{passive:true});
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+/* Rétrécit la police d'un mot trop long pour tenir sur une ligne dans son conteneur */
+function fitSkillText(el){
+  el.style.fontSize='';
+  const container=el.parentElement;
+  const avail=container.clientWidth;
+  const natural=el.scrollWidth;
+  if(avail>0&&natural>avail){
+    const base=parseFloat(getComputedStyle(el).fontSize);
+    el.style.fontSize=Math.max(base*(avail/natural),14)+'px';
+  }
+}
+
+/* Animation compétences — gauche + droite en parallèle (séquentiel sur mobile) */
+function runSkills(){
+  const isMobile=window.innerWidth<600;
+  /* Sur mobile, on fusionne les deux listes en une seule */
+  const allSkills=isMobile
+    ? SKILLS_L.concat(SKILLS_R).slice(0,6)
+    : null;
+  const total=isMobile?allSkills.length:Math.max(SKILLS_L.length,SKILLS_R.length);
+  const dur=isMobile?800:SKILL_DUR;
+  let i=0;
+
+  function showPair(){
+    if(i>=total){btn.classList.add('visible');return;}
+
+    if(isMobile){
+      /* Mobile : tout dans le bloc gauche, centré */
+      skillLabel.textContent=allSkills[i].label;
+      skillName.textContent=allSkills[i].name;
+      fitSkillText(skillName);
+      skillLabel.classList.add('show');
+      skillName.classList.add('show');
+    } else {
+      /* Desktop : gauche + droite simultané */
+      if(i<SKILLS_L.length){
+        skillLabel.textContent=SKILLS_L[i].label;
+        skillName.textContent=SKILLS_L[i].name;
+        fitSkillText(skillName);
+        skillLabel.classList.add('show');
+        skillName.classList.add('show');
+      }
+      if(i<SKILLS_R.length){
+        skillLabelR.textContent=SKILLS_R[i].label;
+        skillNameR.textContent=SKILLS_R[i].name;
+        fitSkillText(skillNameR);
+        skillLabelR.classList.add('show');
+        skillNameR.classList.add('show');
+      }
+    }
+
+    setTimeout(()=>{
+      [skillLabel,skillName,skillLabelR,skillNameR].forEach(el=>el.classList.remove('show'));
+      setTimeout(()=>{i++;showPair();},180);
+    },dur);
+  }
+  showPair();
+}
+
+/* Déclenchement */
+window.addEventListener('startTree',()=>{
+  ts.classList.add('visible');
+  if(!treeAlive){treeAlive=true;animate();killRandom();}
+  setTimeout(runSkills,800);
+});
+
+/* Bouton BIENVENUE → site */
+btn.addEventListener('click',()=>{
+  ts.classList.add('hide');
+  setTimeout(()=>{
+    /* arrêt complet de la scène 3D : plus aucun calcul en arrière-plan */
+    treeAlive=false;
+    document.removeEventListener('mousemove',onTreeMove);
+    controls.dispose();renderer.dispose();
+    ts.remove();
+  },700);
+});
+
+})(); /* fin IIFE */
+</script>
+
+<script>
+/* --- Chiffres clés : calculés depuis le contenu du site --- */
+(function(){
+  const band=document.querySelector('.kpi-band');
+  if(!band)return;
+  const counts={
+    projects:document.querySelectorAll('#projects-grid .project-card').length,
+    maps:document.querySelectorAll('#gallery-cartes .map-card').length,
+    videos:document.querySelectorAll('.videos-grid .video-card').length
+  };
+  const nums=[...band.querySelectorAll('.kpi-num')].map(el=>({el,to:+(el.dataset.to||counts[el.dataset.count]||0)}));
+  const fmt=n=>n.toLocaleString('fr-FR');
+  /* sans animation : valeurs finales directement */
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    nums.forEach(n=>n.el.textContent=fmt(n.to));band.classList.add('visible');return;
+  }
+  const io=new IntersectionObserver(es=>{
+    if(!es[0].isIntersecting)return;
+    io.disconnect();band.classList.add('visible');
+    const start=performance.now(),D=1800;
+    (function tick(now){
+      const t=Math.min((now-start)/D,1),e=1-Math.pow(1-t,3);
+      nums.forEach(n=>n.el.textContent=fmt(Math.round(e*n.to)));
+      if(t<1)requestAnimationFrame(tick);
+    })(start);
+  },{threshold:.4});
+  io.observe(band);
+})();
+
+/* --- Formulaire de contact : envoi sans quitter la page --- */
+(function(){
+  const form=document.querySelector('.contact-form');
+  if(!form||!window.fetch)return;
+  const status=form.querySelector('.form-status');
+  const btn=form.querySelector('button[type="submit"]');
+  const show=(cls,html)=>{status.className='form-status show '+cls;status.innerHTML=html;};
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();
+    btn.disabled=true;
+    const label=btn.innerHTML;
+    btn.innerHTML='<i class="bx bx-loader-alt bx-spin"></i> Envoi…';
+    try{
+      const r=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{Accept:'application/json'}});
+      if(!r.ok)throw new Error(r.status);
+      form.reset();
+      show('ok','<i class="bx bx-check-circle"></i> Message envoyé — merci ! Je vous réponds rapidement.');
+    }catch(err){
+      show('err','<i class="bx bx-error-circle"></i> L’envoi a échoué. Écrivez-moi directement : ericn4712@gmail.com');
+    }finally{
+      btn.disabled=false;btn.innerHTML=label;
+    }
+  });
+})();
+
+/* --- Carte vidéo mise en avant : bouton lecture --- */
+document.querySelectorAll('.video-featured').forEach(card=>{
+  const v=card.querySelector('video'),b=card.querySelector('.vf-play');
+  if(!v||!b)return;
+  b.addEventListener('click',e=>{e.stopPropagation();v.play();});
+  v.addEventListener('play',()=>{b.hidden=true;});
+  v.addEventListener('pause',()=>{if(!v.ended&&v.currentTime>0)return;b.hidden=false;});
+  v.addEventListener('ended',()=>{b.hidden=false;});
+});
+
+/* --- Une seule vidéo sonore à la fois --- */
+document.querySelectorAll('video:not(#hero-vi)').forEach(v=>{
+  v.addEventListener('play',()=>{
+    const hero=document.getElementById('hero-vi');
+    if(hero){hero.muted=true;const mb=document.getElementById('nav-mute-btn');if(mb)mb.innerHTML='<i class="fi fi-sr-volume-mute"></i>';}
+    document.querySelectorAll('video:not(#hero-vi)').forEach(o=>{if(o!==v&&!o.paused)o.pause();});
   });
 });
+
+/* --- Vidéo hero : volume bas + bouton mute dans la nav --- */
+(function(){
+  const vi   = document.getElementById('hero-vi');
+  const btn  = document.getElementById('nav-mute-btn');
+  const hint = document.getElementById('hero-sound-hint');
+  if(!vi || !btn) return;
+
+  const LOW = 0.07;
+
+
+  /* Active le son après la première interaction utilisateur */
+  function trySound(){
+    vi.muted  = false;
+    vi.volume = LOW;
+    vi.play().then(()=>{ btn.innerHTML='<i class="fi fi-sr-volume-down"></i>'; })
+             .catch(()=>{ vi.muted=true; btn.innerHTML='<i class="fi fi-sr-volume-mute"></i>'; });
+  }
+  document.addEventListener('click', trySound, {once:true});
+
+  /* Bouton mute / unmute */
+  btn.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    if(vi.muted){ vi.muted=false; vi.volume=LOW; btn.innerHTML='<i class="fi fi-sr-volume-down"></i>'; }
+    else        { vi.muted=true;                 btn.innerHTML='<i class="fi fi-sr-volume-mute"></i>'; }
+  });
+})();
 </script>
 
 </body>

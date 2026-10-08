@@ -1,8 +1,8 @@
 // Basemap sobre (CARTO Dark)
 const map = L.map('map', { zoomControl:true }).setView([43.2965, 5.3698], 12);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 20,
-  attribution: '&copy; OSM &copy; CARTO'
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 20, maxNativeZoom: 16,
+  attribution: 'Tiles &copy; Esri'
 }).addTo(map);
 
 // Fichiers (attention accent "vélo")

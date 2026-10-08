@@ -19,3 +19,22 @@ src/
 .DS_Store
 Thumbs.db
 
+
+# Données SIG lourdes (non utilisées par le site, > limite GitHub)
+*.gpkg
+assets/projects/projet_linkedin_r_dashboard/output/
+
+# Originaux lourds : le site utilise les versions optimisées
+# (assets/video/web/, assets/video/posters/, assets/cartes/thumbs/, assets/cartes/hd/)
+assets/video/Application_RSHANY.mp4
+assets/video/EEPATHO_motion_design_voix_v2.mp4
+assets/video/Prévalence_incidence.mp4
+assets/video/eepatho.mp4
+assets/image/caracteristique.mp4
+assets/cartes/CARTE DE CAH.png
+assets/cartes/CIV_3.png
+assets/cartes/acces_au soin.png
+assets/cartes/bati_commune_cocody.png
+assets/cartes/carte_bivariee_eepatho.png
+assets/cartes/corse_layout_pro.png
+assets/cartes/pyrenees_layout_pro.png

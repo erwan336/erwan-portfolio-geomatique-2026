@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>EEPATHO — Dashboard unifié</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; width:100%;
+               font-family:'Segoe UI', Arial, sans-serif; overflow:hidden; }
+  .app { display:flex; height:100vh; width:100vw; }
+  .map-container { flex:1; position:relative; background:#f4f6f8; }
+  .map-container iframe { width:100%; height:100%; border:none; display:block; }
+  .sidebar { width:380px; background:#f4f6f8; overflow-y:auto;
+             box-shadow:-2px 0 8px rgba(0,0,0,0.08); }
+  .sidebar-header { background:linear-gradient(135deg, #3b4994 0%, #5698b9 100%);
+                    color:white; padding:20px 24px; }
+  .sidebar-header h1 { margin:0; font-size:18px; font-weight:700; }
+  .sidebar-header .sub { font-size:11px; opacity:0.9; margin-top:4px; }
+  .sidebar-body { padding:20px 24px; }
+  .section-title { font-size:12px; font-weight:700; text-transform:uppercase;
+                   color:#7f8c8d; margin:20px 0 10px; letter-spacing:0.5px; }
+  .section-title:first-child { margin-top:0; }
+  .stat-row { display:flex; justify-content:space-between; align-items:center;
+              padding:6px 0; font-size:13px; border-bottom:1px dashed #e1e8ed; }
+  .stat-row:last-child { border-bottom:none; }
+  .stat-label { color:#555; }
+  .stat-value { font-weight:600; color:#2c3e50; }
+  .card { background:white; padding:14px 16px; border-radius:8px;
+          box-shadow:0 2px 6px rgba(0,0,0,0.06); margin-bottom:12px; }
+  .card.highlight { border-left:4px solid #3b4994; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:10px;
+           font-size:10px; font-weight:700; text-transform:uppercase; color:white; }
+  .badge.low  { background:#27ae60; }
+  .badge.mid  { background:#e67e22; }
+  .badge.high { background:#c0392b; }
+  .big-number { font-size:28px; font-weight:700; margin:4px 0; }
+  .big-number.risk-high { color:#c0392b; }
+  .big-number.risk-mid  { color:#e67e22; }
+  .big-number.risk-low  { color:#27ae60; }
+  .hint { text-align:center; padding:20px; color:#95a5a6; font-size:12px;
+          font-style:italic; }
+  .legend-mini { display:flex; justify-content:center; margin:10px 0; }
+  .legend-mini table { border-collapse:collapse; }
+  .legend-mini td { width:18px; height:18px; }
+  .legend-caption { font-size:10px; color:#888; text-align:center;
+                    font-style:italic; line-height:1.3; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="map-container">
+    <iframe src="carte_interactive_eepatho.html"
+            id="map-iframe" title="Carte interactive"></iframe>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h1>EEPATHO</h1>
+      <div class="sub">Défavorisation × Densité tabac</div>
+    </div>
+
+    <div class="sidebar-body">
+
+      <div id="stats-national">
+        <div class="section-title">📊 France entière</div>
+        <div class="card highlight">
+          <div class="stat-row">
+            <span class="stat-label">Communes analysées</span>
+            <span class="stat-value">34 859</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Débits de tabac</span>
+            <span class="stat-value">23 265</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Classe 33 (double peine)</span>
+            <span class="stat-value">4.6 %</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Corrélation Spearman</span>
+            <span class="stat-value">0.065</span>
+          </div>
+        </div>
+
+        <div class="section-title">🗺 Légende bivariée</div>
+        <div class="card">
+          <div class="legend-mini">
+            <table>
+              <tr>
+                <td style="background:#be64ac;"></td>
+                <td style="background:#8c62aa;"></td>
+                <td style="background:#3b4994;"></td>
+              </tr>
+              <tr>
+                <td style="background:#dfb0d6;"></td>
+                <td style="background:#a5add3;"></td>
+                <td style="background:#5698b9;"></td>
+              </tr>
+              <tr>
+                <td style="background:#e8e8e8;"></td>
+                <td style="background:#ace4e4;"></td>
+                <td style="background:#5ac8c8;"></td>
+              </tr>
+              <tr>
+                <td style="background:#f5f5f5;"></td>
+                <td style="background:#e0e0e0;"></td>
+                <td style="background:#bdbdbd;"></td>
+              </tr>
+            </table>
+          </div>
+          <div class="legend-caption">
+            ↑ Densité tabac &nbsp;·&nbsp; → Défavorisation
+          </div>
+        </div>
+
+        <div class="hint">
+          👉 Sélectionne un département dans<br>la carte pour voir ses stats
+        </div>
+      </div>
+
+      <div id="stats-dept"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  var depStats = {"01": {"nom": "Ain", "n_comm": 393, "pop_tot": 652432, "fdep_med": -0.09, "fdep_vs_nat": -0.43, "n_debits": 232, "dens_med": 6.71, "pct_no_tabac": 57.8, "pct_class33": 2.3, "corr_loc": 0.037}, "02": {"nom": "Aisne", "n_comm": 799, "pop_tot": 531345, "fdep_med": 0.99, "fdep_vs_nat": 0.66, "n_debits": 280, "dens_med": 9.94, "pct_no_tabac": 82.6, "pct_class33": 4.5, "corr_loc": 0.12}, "03": {"nom": "Allier", "n_comm": 317, "pop_tot": 335975, "fdep_med": 0.85, "fdep_vs_nat": 0.52, "n_debits": 189, "dens_med": 10.79, "pct_no_tabac": 66.6, "pct_class33": 8.5, "corr_loc": 0.067}, "04": {"nom": "Alpes-de-Haute-Provence", "n_comm": 198, "pop_tot": 164308, "fdep_med": 0.14, "fdep_vs_nat": -0.2, "n_debits": 93, "dens_med": 12.25, "pct_no_tabac": 69.2, "pct_class33": 3.5, "corr_loc": 0.05}, "05": {"nom": "Hautes-Alpes", "n_comm": 162, "pop_tot": 141220, "fdep_med": -0.49, "fdep_vs_nat": -0.83, "n_debits": 83, "dens_med": 12.87, "pct_no_tabac": 68.5, "pct_class33": 1.9, "corr_loc": -0.078}, "06": {"nom": "Alpes-Maritimes", "n_comm": 163, "pop_tot": 1094283, "fdep_med": -0.49, "fdep_vs_nat": -0.82, "n_debits": 335, "dens_med": 4.71, "pct_no_tabac": 45.4, "pct_class33": 1.8, "corr_loc": -0.118}, "07": {"nom": "Ard\u00e8che", "n_comm": 335, "pop_tot": 328278, "fdep_med": 0.53, "fdep_vs_nat": 0.19, "n_debits": 179, "dens_med": 9.22, "pct_no_tabac": 61.5, "pct_class33": 7.5, "corr_loc": 0.213}, "08": {"nom": "Ardennes", "n_comm": 449, "pop_tot": 270582, "fdep_med": 0.77, "fdep_vs_nat": 0.44, "n_debits": 115, "dens_med": 9.21, "pct_no_tabac": 86.2, "pct_class33": 2.7, "corr_loc": 0.136}, "09": {"nom": "Ari\u00e8ge", "n_comm": 327, "pop_tot": 153287, "fdep_med": 0.21, "fdep_vs_nat": -0.12, "n_debits": 85, "dens_med": 14.37, "pct_no_tabac": 84.4, "pct_class33": 3.1, "corr_loc": 0.13}, "10": {"nom": "Aube", "n_comm": 431, "pop_tot": 310242, "fdep_med": 0.63, "fdep_vs_nat": 0.3, "n_debits": 145, "dens_med": 10.08, "pct_no_tabac": 82.4, "pct_class33": 3.7, "corr_loc": 0.131}, "11": {"nom": "Aude", "n_comm": 433, "pop_tot": 374070, "fdep_med": 0.53, "fdep_vs_nat": 0.2, "n_debits": 184, "dens_med": 8.83, "pct_no_tabac": 78.1, "pct_class33": 3.0, "corr_loc": 0.15}, "12": {"nom": "Aveyron", "n_comm": 285, "pop_tot": 279595, "fdep_med": 0.12, "fdep_vs_nat": -0.21, "n_debits": 176, "dens_med": 13.83, "pct_no_tabac": 61.1, "pct_class33": 4.6, "corr_loc": 0.073}, "13": {"nom": "Bouches-du-Rh\u00f4ne", "n_comm": 118, "pop_tot": 1172379, "fdep_med": -1.05, "fdep_vs_nat": -1.39, "n_debits": 332, "dens_med": 2.7, "pct_no_tabac": 9.3, "pct_class33": 0.0, "corr_loc": 0.266}, "14": {"nom": "Calvados", "n_comm": 527, "pop_tot": 692999, "fdep_med": 0.05, "fdep_vs_nat": -0.29, "n_debits": 297, "dens_med": 7.43, "pct_no_tabac": 75.0, "pct_class33": 2.1, "corr_loc": 0.068}, "15": {"nom": "Cantal", "n_comm": 246, "pop_tot": 144692, "fdep_med": 0.58, "fdep_vs_nat": 0.24, "n_debits": 132, "dens_med": 17.94, "pct_no_tabac": 64.2, "pct_class33": 10.2, "corr_loc": 0.069}, "16": {"nom": "Charente", "n_comm": 364, "pop_tot": 352015, "fdep_med": 0.97, "fdep_vs_nat": 0.63, "n_debits": 187, "dens_med": 11.22, "pct_no_tabac": 70.6, "pct_class33": 9.1, "corr_loc": 0.04}, "17": {"nom": "Charente-Maritime", "n_comm": 463, "pop_tot": 651358, "fdep_med": 0.86, "fdep_vs_nat": 0.52, "n_debits": 254, "dens_med": 8.01, "pct_no_tabac": 61.1, "pct_class33": 9.3, "corr_loc": 0.024}, "18": {"nom": "Cher", "n_comm": 287, "pop_tot": 302306, "fdep_med": 0.85, "fdep_vs_nat": 0.52, "n_debits": 182, "dens_med": 12.24, "pct_no_tabac": 65.5, "pct_class33": 11.8, "corr_loc": 0.102}, "19": {"nom": "Corr\u00e8ze", "n_comm": 279, "pop_tot": 240073, "fdep_med": 0.29, "fdep_vs_nat": -0.05, "n_debits": 159, "dens_med": 13.26, "pct_no_tabac": 69.2, "pct_class33": 4.3, "corr_loc": -0.036}, "21": {"nom": "C\u00f4te-d'Or", "n_comm": 698, "pop_tot": 534124, "fdep_med": 0.02, "fdep_vs_nat": -0.31, "n_debits": 192, "dens_med": 9.62, "pct_no_tabac": 87.5, "pct_class33": 2.9, "corr_loc": 0.085}, "22": {"nom": "C\u00f4tes-d'Armor", "n_comm": 348, "pop_tot": 600582, "fdep_med": 0.67, "fdep_vs_nat": 0.34, "n_debits": 356, "dens_med": 8.95, "pct_no_tabac": 35.9, "pct_class33": 12.6, "corr_loc": 0.038}, "23": {"nom": "Creuse", "n_comm": 256, "pop_tot": 116617, "fdep_med": 0.72, "fdep_vs_nat": 0.38, "n_debits": 84, "dens_med": 15.79, "pct_no_tabac": 77.3, "pct_class33": 9.4, "corr_loc": 0.088}, "24": {"nom": "Dordogne", "n_comm": 503, "pop_tot": 413223, "fdep_med": 0.81, "fdep_vs_nat": 0.48, "n_debits": 251, "dens_med": 12.87, "pct_no_tabac": 69.8, "pct_class33": 10.9, "corr_loc": 0.182}, "25": {"nom": "Doubs", "n_comm": 571, "pop_tot": 543974, "fdep_med": 0.0, "fdep_vs_nat": -0.34, "n_debits": 204, "dens_med": 7.16, "pct_no_tabac": 80.2, "pct_class33": 1.4, "corr_loc": 0.038}, "26": {"nom": "Dr\u00f4me", "n_comm": 363, "pop_tot": 516762, "fdep_med": -0.04, "fdep_vs_nat": -0.38, "n_debits": 186, "dens_med": 6.67, "pct_no_tabac": 67.5, "pct_class33": 3.0, "corr_loc": 0.133}, "27": {"nom": "Eure", "n_comm": 584, "pop_tot": 597738, "fdep_med": 0.28, "fdep_vs_nat": -0.05, "n_debits": 238, "dens_med": 9.22, "pct_no_tabac": 77.1, "pct_class33": 3.6, "corr_loc": 0.219}, "28": {"nom": "Eure-et-Loir", "n_comm": 365, "pop_tot": 431575, "fdep_med": -0.02, "fdep_vs_nat": -0.36, "n_debits": 213, "dens_med": 8.62, "pct_no_tabac": 72.6, "pct_class33": 1.9, "corr_loc": 0.107}, "29": {"nom": "Finist\u00e8re", "n_comm": 277, "pop_tot": 915090, "fdep_med": 0.15, "fdep_vs_nat": -0.19, "n_debits": 496, "dens_med": 6.71, "pct_no_tabac": 19.9, "pct_class33": 6.5, "corr_loc": 0.19}, "2A": {"nom": "Corse-du-Sud", "n_comm": 124, "pop_tot": 158507, "fdep_med": -0.11, "fdep_vs_nat": -0.44, "n_debits": 0, "dens_med": 0, "pct_no_tabac": 100.0, "pct_class33": 0.0, "corr_loc": null}, "2B": {"nom": "Haute-Corse", "n_comm": 236, "pop_tot": 181933, "fdep_med": 0.3, "fdep_vs_nat": -0.04, "n_debits": 0, "dens_med": 0, "pct_no_tabac": 100.0, "pct_class33": 0.0, "corr_loc": null}, "30": {"nom": "Gard", "n_comm": 351, "pop_tot": 748437, "fdep_med": 0.16, "fdep_vs_nat": -0.18, "n_debits": 287, "dens_med": 5.83, "pct_no_tabac": 62.1, "pct_class33": 3.1, "corr_loc": 0.153}, "31": {"nom": "Haute-Garonne", "n_comm": 585, "pop_tot": 1400032, "fdep_med": -0.66, "fdep_vs_nat": -0.99, "n_debits": 306, "dens_med": 3.93, "pct_no_tabac": 75.9, "pct_class33": 0.5, "corr_loc": -0.084}, "32": {"nom": "Gers", "n_comm": 461, "pop_tot": 191377, "fdep_med": -0.02, "fdep_vs_nat": -0.36, "n_debits": 115, "dens_med": 15.24, "pct_no_tabac": 84.6, "pct_class33": 3.0, "corr_loc": 0.222}, "33": {"nom": "Gironde", "n_comm": 535, "pop_tot": 1623749, "fdep_med": 0.54, "fdep_vs_nat": 0.2, "n_debits": 523, "dens_med": 5.63, "pct_no_tabac": 57.8, "pct_class33": 6.0, "corr_loc": 0.073}, "34": {"nom": "H\u00e9rault", "n_comm": 342, "pop_tot": 1175623, "fdep_med": 0.05, "fdep_vs_nat": -0.29, "n_debits": 399, "dens_med": 4.88, "pct_no_tabac": 50.6, "pct_class33": 2.3, "corr_loc": 0.118}, "35": {"nom": "Ille-et-Vilaine", "n_comm": 333, "pop_tot": 1079498, "fdep_med": 0.28, "fdep_vs_nat": -0.06, "n_debits": 440, "dens_med": 6.05, "pct_no_tabac": 30.9, "pct_class33": 7.2, "corr_loc": 0.077}, "36": {"nom": "Indre", "n_comm": 241, "pop_tot": 219316, "fdep_med": 1.16, "fdep_vs_nat": 0.82, "n_debits": 148, "dens_med": 12.92, "pct_no_tabac": 67.2, "pct_class33": 14.5, "corr_loc": 0.135}, "37": {"nom": "Indre-et-Loire", "n_comm": 272, "pop_tot": 610079, "fdep_med": 0.47, "fdep_vs_nat": 0.14, "n_debits": 252, "dens_med": 7.42, "pct_no_tabac": 51.8, "pct_class33": 7.7, "corr_loc": -0.019}, "38": {"nom": "Is\u00e8re", "n_comm": 512, "pop_tot": 1271166, "fdep_med": -0.48, "fdep_vs_nat": -0.81, "n_debits": 438, "dens_med": 5.21, "pct_no_tabac": 55.3, "pct_class33": 1.0, "corr_loc": 0.101}, "39": {"nom": "Jura", "n_comm": 494, "pop_tot": 259199, "fdep_med": 0.25, "fdep_vs_nat": -0.09, "n_debits": 111, "dens_med": 11.76, "pct_no_tabac": 86.4, "pct_class33": 3.2, "corr_loc": 0.211}, "40": {"nom": "Landes", "n_comm": 327, "pop_tot": 413690, "fdep_med": 0.6, "fdep_vs_nat": 0.27, "n_debits": 153, "dens_med": 7.31, "pct_no_tabac": 70.0, "pct_class33": 5.2, "corr_loc": 0.061}, "41": {"nom": "Loir-et-Cher", "n_comm": 267, "pop_tot": 329470, "fdep_med": 0.63, "fdep_vs_nat": 0.3, "n_debits": 176, "dens_med": 9.25, "pct_no_tabac": 58.8, "pct_class33": 8.2, "corr_loc": 0.175}, "42": {"nom": "Loire", "n_comm": 323, "pop_tot": 765634, "fdep_med": 0.17, "fdep_vs_nat": -0.17, "n_debits": 344, "dens_med": 7.21, "pct_no_tabac": 60.4, "pct_class33": 5.9, "corr_loc": 0.266}, "43": {"nom": "Haute-Loire", "n_comm": 257, "pop_tot": 227570, "fdep_med": 0.61, "fdep_vs_nat": 0.27, "n_debits": 176, "dens_med": 13.14, "pct_no_tabac": 55.3, "pct_class33": 12.1, "corr_loc": 0.078}, "44": {"nom": "Loire-Atlantique", "n_comm": 207, "pop_tot": 1429272, "fdep_med": 0.32, "fdep_vs_nat": -0.02, "n_debits": 379, "dens_med": 3.41, "pct_no_tabac": 17.4, "pct_class33": 1.9, "corr_loc": 0.157}, "45": {"nom": "Loiret", "n_comm": 325, "pop_tot": 680434, "fdep_med": 0.4, "fdep_vs_nat": 0.07, "n_debits": 265, "dens_med": 6.73, "pct_no_tabac": 57.8, "pct_class33": 3.1, "corr_loc": 0.093}, "46": {"nom": "Lot", "n_comm": 313, "pop_tot": 174094, "fdep_med": 0.13, "fdep_vs_nat": -0.21, "n_debits": 110, "dens_med": 16.75, "pct_no_tabac": 78.0, "pct_class33": 2.9, "corr_loc": 0.22}, "47": {"nom": "Lot-et-Garonne", "n_comm": 319, "pop_tot": 331271, "fdep_med": 0.8, "fdep_vs_nat": 0.47, "n_debits": 160, "dens_med": 9.72, "pct_no_tabac": 68.7, "pct_class33": 9.7, "corr_loc": 0.256}, "48": {"nom": "Loz\u00e8re", "n_comm": 152, "pop_tot": 76604, "fdep_med": -0.1, "fdep_vs_nat": -0.43, "n_debits": 53, "dens_med": 19.39, "pct_no_tabac": 76.3, "pct_class33": 1.3, "corr_loc": 0.194}, "49": {"nom": "Maine-et-Loire", "n_comm": 177, "pop_tot": 818273, "fdep_med": 0.57, "fdep_vs_nat": 0.23, "n_debits": 205, "dens_med": 4.44, "pct_no_tabac": 51.4, "pct_class33": 2.3, "corr_loc": -0.002}, "50": {"nom": "Manche", "n_comm": 446, "pop_tot": 495045, "fdep_med": 0.81, "fdep_vs_nat": 0.47, "n_debits": 271, "dens_med": 11.28, "pct_no_tabac": 65.0, "pct_class33": 10.8, "corr_loc": 0.098}, "51": {"nom": "Marne", "n_comm": 613, "pop_tot": 566855, "fdep_med": 0.02, "fdep_vs_nat": -0.31, "n_debits": 224, "dens_med": 9.8, "pct_no_tabac": 83.8, "pct_class33": 1.8, "corr_loc": -0.006}, "52": {"nom": "Haute-Marne", "n_comm": 426, "pop_tot": 172512, "fdep_med": 1.17, "fdep_vs_nat": 0.83, "n_debits": 79, "dens_med": 13.76, "pct_no_tabac": 87.3, "pct_class33": 6.3, "corr_loc": 0.159}, "53": {"nom": "Mayenne", "n_comm": 240, "pop_tot": 307062, "fdep_med": 1.03, "fdep_vs_nat": 0.7, "n_debits": 169, "dens_med": 10.03, "pct_no_tabac": 55.4, "pct_class33": 12.9, "corr_loc": 0.001}, "54": {"nom": "Meurthe-et-Moselle", "n_comm": 591, "pop_tot": 733760, "fdep_med": 0.02, "fdep_vs_nat": -0.32, "n_debits": 203, "dens_med": 4.77, "pct_no_tabac": 82.9, "pct_class33": 1.4, "corr_loc": 0.052}, "55": {"nom": "Meuse", "n_comm": 493, "pop_tot": 184083, "fdep_med": 0.83, "fdep_vs_nat": 0.5, "n_debits": 60, "dens_med": 9.84, "pct_no_tabac": 91.7, "pct_class33": 2.6, "corr_loc": 0.114}, "56": {"nom": "Morbihan", "n_comm": 249, "pop_tot": 759684, "fdep_med": 0.81, "fdep_vs_nat": 0.48, "n_debits": 385, "dens_med": 6.06, "pct_no_tabac": 23.3, "pct_class33": 8.8, "corr_loc": 0.052}, "57": {"nom": "Moselle", "n_comm": 725, "pop_tot": 1046543, "fdep_med": 0.33, "fdep_vs_nat": -0.0, "n_debits": 213, "dens_med": 5.3, "pct_no_tabac": 82.3, "pct_class33": 3.0, "corr_loc": 0.164}, "58": {"nom": "Ni\u00e8vre", "n_comm": 309, "pop_tot": 204452, "fdep_med": 0.77, "fdep_vs_nat": 0.44, "n_debits": 120, "dens_med": 14.01, "pct_no_tabac": 77.7, "pct_class33": 7.8, "corr_loc": 0.107}, "59": {"nom": "Nord", "n_comm": 648, "pop_tot": 2608346, "fdep_med": 0.26, "fdep_vs_nat": -0.07, "n_debits": 672, "dens_med": 4.64, "pct_no_tabac": 50.8, "pct_class33": 2.9, "corr_loc": 0.199}, "60": {"nom": "Oise", "n_comm": 679, "pop_tot": 829419, "fdep_med": 0.1, "fdep_vs_nat": -0.23, "n_debits": 287, "dens_med": 7.65, "pct_no_tabac": 74.8, "pct_class33": 3.5, "corr_loc": 0.1}, "61": {"nom": "Orne", "n_comm": 385, "pop_tot": 279942, "fdep_med": 0.93, "fdep_vs_nat": 0.59, "n_debits": 129, "dens_med": 13.29, "pct_no_tabac": 80.3, "pct_class33": 7.0, "corr_loc": 0.121}, "62": {"nom": "Pas-de-Calais", "n_comm": 890, "pop_tot": 1465278, "fdep_med": 0.66, "fdep_vs_nat": 0.32, "n_debits": 660, "dens_med": 7.44, "pct_no_tabac": 64.0, "pct_class33": 5.5, "corr_loc": 0.154}, "63": {"nom": "Puy-de-D\u00f4me", "n_comm": 464, "pop_tot": 662152, "fdep_med": 0.35, "fdep_vs_nat": 0.01, "n_debits": 331, "dens_med": 11.18, "pct_no_tabac": 60.6, "pct_class33": 6.7, "corr_loc": 0.012}, "64": {"nom": "Pyr\u00e9n\u00e9es-Atlantiques", "n_comm": 546, "pop_tot": 682621, "fdep_med": -0.09, "fdep_vs_nat": -0.42, "n_debits": 268, "dens_med": 8.56, "pct_no_tabac": 76.0, "pct_class33": 1.6, "corr_loc": 0.007}, "65": {"nom": "Hautes-Pyr\u00e9n\u00e9es", "n_comm": 469, "pop_tot": 229567, "fdep_med": -0.2, "fdep_vs_nat": -0.54, "n_debits": 111, "dens_med": 16.39, "pct_no_tabac": 87.8, "pct_class33": 1.7, "corr_loc": 0.031}, "66": {"nom": "Pyr\u00e9n\u00e9es-Orientales", "n_comm": 226, "pop_tot": 479979, "fdep_med": 0.44, "fdep_vs_nat": 0.11, "n_debits": 139, "dens_med": 4.85, "pct_no_tabac": 66.4, "pct_class33": 1.8, "corr_loc": 0.118}, "67": {"nom": "Bas-Rhin", "n_comm": 514, "pop_tot": 1140057, "fdep_med": 0.01, "fdep_vs_nat": -0.33, "n_debits": 283, "dens_med": 4.94, "pct_no_tabac": 69.3, "pct_class33": 1.9, "corr_loc": 0.034}, "68": {"nom": "Haut-Rhin", "n_comm": 366, "pop_tot": 767086, "fdep_med": -0.38, "fdep_vs_nat": -0.71, "n_debits": 204, "dens_med": 5.36, "pct_no_tabac": 65.6, "pct_class33": 1.4, "corr_loc": 0.16}, "69": {"nom": "Rh\u00f4ne", "n_comm": 266, "pop_tot": 1352778, "fdep_med": -0.8, "fdep_vs_nat": -1.14, "n_debits": 369, "dens_med": 3.9, "pct_no_tabac": 35.3, "pct_class33": 1.5, "corr_loc": 0.08}, "70": {"nom": "Haute-Sa\u00f4ne", "n_comm": 539, "pop_tot": 235313, "fdep_med": 0.84, "fdep_vs_nat": 0.51, "n_debits": 123, "dens_med": 14.14, "pct_no_tabac": 87.9, "pct_class33": 4.3, "corr_loc": 0.088}, "71": {"nom": "Sa\u00f4ne-et-Loire", "n_comm": 565, "pop_tot": 551493, "fdep_med": 0.4, "fdep_vs_nat": 0.06, "n_debits": 285, "dens_med": 10.78, "pct_no_tabac": 72.9, "pct_class33": 6.0, "corr_loc": 0.189}, "72": {"nom": "Sarthe", "n_comm": 354, "pop_tot": 566412, "fdep_med": 0.95, "fdep_vs_nat": 0.62, "n_debits": 261, "dens_med": 7.93, "pct_no_tabac": 57.3, "pct_class33": 9.3, "corr_loc": 0.082}, "73": {"nom": "Savoie", "n_comm": 273, "pop_tot": 436434, "fdep_med": -0.72, "fdep_vs_nat": -1.05, "n_debits": 202, "dens_med": 10.94, "pct_no_tabac": 60.4, "pct_class33": 0.7, "corr_loc": -0.042}, "74": {"nom": "Haute-Savoie", "n_comm": 279, "pop_tot": 826094, "fdep_med": -1.47, "fdep_vs_nat": -1.81, "n_debits": 226, "dens_med": 5.31, "pct_no_tabac": 55.2, "pct_class33": 0.4, "corr_loc": 0.048}, "76": {"nom": "Seine-Maritime", "n_comm": 708, "pop_tot": 1255633, "fdep_med": 0.5, "fdep_vs_nat": 0.17, "n_debits": 566, "dens_med": 8.27, "pct_no_tabac": 69.4, "pct_class33": 5.9, "corr_loc": 0.149}, "77": {"nom": "Seine-et-Marne", "n_comm": 507, "pop_tot": 1421197, "fdep_med": -0.83, "fdep_vs_nat": -1.17, "n_debits": 372, "dens_med": 4.59, "pct_no_tabac": 62.3, "pct_class33": 0.0, "corr_loc": 0.09}, "78": {"nom": "Yvelines", "n_comm": 259, "pop_tot": 1448207, "fdep_med": -2.5, "fdep_vs_nat": -2.84, "n_debits": 324, "dens_med": 3.18, "pct_no_tabac": 54.4, "pct_class33": 0.0, "corr_loc": 0.063}, "79": {"nom": "Deux-S\u00e8vres", "n_comm": 256, "pop_tot": 374878, "fdep_med": 0.97, "fdep_vs_nat": 0.64, "n_debits": 152, "dens_med": 7.01, "pct_no_tabac": 68.0, "pct_class33": 5.9, "corr_loc": 0.095}, "80": {"nom": "Somme", "n_comm": 772, "pop_tot": 570559, "fdep_med": 0.94, "fdep_vs_nat": 0.6, "n_debits": 312, "dens_med": 12.04, "pct_no_tabac": 79.0, "pct_class33": 6.3, "corr_loc": 0.077}, "81": {"nom": "Tarn", "n_comm": 314, "pop_tot": 389844, "fdep_med": -0.0, "fdep_vs_nat": -0.34, "n_debits": 135, "dens_med": 7.37, "pct_no_tabac": 75.2, "pct_class33": 2.9, "corr_loc": 0.273}, "82": {"nom": "Tarn-et-Garonne", "n_comm": 195, "pop_tot": 260669, "fdep_med": 0.54, "fdep_vs_nat": 0.21, "n_debits": 150, "dens_med": 8.31, "pct_no_tabac": 62.1, "pct_class33": 4.6, "corr_loc": 0.15}, "83": {"nom": "Var", "n_comm": 153, "pop_tot": 1076711, "fdep_med": -0.09, "fdep_vs_nat": -0.42, "n_debits": 359, "dens_med": 4.06, "pct_no_tabac": 22.2, "pct_class33": 2.6, "corr_loc": 0.177}, "84": {"nom": "Vaucluse", "n_comm": 151, "pop_tot": 561469, "fdep_med": -0.24, "fdep_vs_nat": -0.57, "n_debits": 203, "dens_med": 4.99, "pct_no_tabac": 40.4, "pct_class33": 1.3, "corr_loc": 0.212}, "85": {"nom": "Vend\u00e9e", "n_comm": 257, "pop_tot": 685442, "fdep_med": 1.07, "fdep_vs_nat": 0.74, "n_debits": 239, "dens_med": 5.39, "pct_no_tabac": 45.1, "pct_class33": 6.2, "corr_loc": -0.086}, "86": {"nom": "Vienne", "n_comm": 266, "pop_tot": 438435, "fdep_med": 0.92, "fdep_vs_nat": 0.59, "n_debits": 192, "dens_med": 9.23, "pct_no_tabac": 55.6, "pct_class33": 13.2, "corr_loc": 0.024}, "87": {"nom": "Haute-Vienne", "n_comm": 195, "pop_tot": 372359, "fdep_med": 0.53, "fdep_vs_nat": 0.2, "n_debits": 200, "dens_med": 9.75, "pct_no_tabac": 49.7, "pct_class33": 11.8, "corr_loc": 0.118}, "88": {"nom": "Vosges", "n_comm": 507, "pop_tot": 364499, "fdep_med": 0.99, "fdep_vs_nat": 0.66, "n_debits": 159, "dens_med": 7.45, "pct_no_tabac": 83.4, "pct_class33": 3.7, "corr_loc": 0.196}, "89": {"nom": "Yonne", "n_comm": 423, "pop_tot": 335707, "fdep_med": 0.71, "fdep_vs_nat": 0.38, "n_debits": 183, "dens_med": 13.35, "pct_no_tabac": 78.5, "pct_class33": 7.6, "corr_loc": 0.16}, "90": {"nom": "Territoire de Belfort", "n_comm": 101, "pop_tot": 141318, "fdep_med": -0.23, "fdep_vs_nat": -0.56, "n_debits": 47, "dens_med": 6.37, "pct_no_tabac": 79.2, "pct_class33": 0.0, "corr_loc": 0.276}, "91": {"nom": "Essonne", "n_comm": 194, "pop_tot": 1301659, "fdep_med": -1.74, "fdep_vs_nat": -2.08, "n_debits": 255, "dens_med": 2.67, "pct_no_tabac": 50.0, "pct_class33": 0.0, "corr_loc": 0.031}, "92": {"nom": "Hauts-de-Seine", "n_comm": 36, "pop_tot": 1624357, "fdep_med": -3.26, "fdep_vs_nat": -3.6, "n_debits": 288, "dens_med": 1.9, "pct_no_tabac": 8.3, "pct_class33": 0.0, "corr_loc": -0.262}, "93": {"nom": "Seine-Saint-Denis", "n_comm": 40, "pop_tot": 1644903, "fdep_med": 0.85, "fdep_vs_nat": 0.51, "n_debits": 286, "dens_med": 1.96, "pct_no_tabac": 10.0, "pct_class33": 0.0, "corr_loc": -0.44}, "94": {"nom": "Val-de-Marne", "n_comm": 47, "pop_tot": 1407124, "fdep_med": -1.37, "fdep_vs_nat": -1.7, "n_debits": 287, "dens_med": 2.04, "pct_no_tabac": 8.5, "pct_class33": 0.0, "corr_loc": -0.044}, "95": {"nom": "Val-d'Oise", "n_comm": 184, "pop_tot": 1249674, "fdep_med": -1.75, "fdep_vs_nat": -2.09, "n_debits": 256, "dens_med": 2.99, "pct_no_tabac": 48.4, "pct_class33": 0.0, "corr_loc": 0.135}};
+  var natCorr = 0.065;
+
+  function fmtNum(n) {
+    if (n === null || n === undefined) return 'N/A';
+    return n.toLocaleString('fr-FR');
+  }
+
+  function buildDeptFiche(dep) {
+    var s = depStats[dep];
+    if (!s) return '';
+    var arrow = s.fdep_vs_nat > 0.3 ? '🔺' : s.fdep_vs_nat < -0.3 ? '🔻' : '≈';
+    var lab   = s.fdep_vs_nat > 0.3 ? 'plus défavorisé' :
+                s.fdep_vs_nat < -0.3 ? 'moins défavorisé' : 'proche moyenne';
+    var rCls = s.pct_class33 >= 15 ? 'high' : s.pct_class33 >= 8 ? 'mid' : 'low';
+    var rTxt = s.pct_class33 >= 15 ? 'ÉLEVÉ' : s.pct_class33 >= 8 ? 'MODÉRÉ' : 'FAIBLE';
+    var corrTxt = s.corr_loc !== null
+      ? s.corr_loc.toFixed(2) + ' <span style="color:#888; font-size:11px;">(France: ' + natCorr.toFixed(2) + ')</span>'
+      : '<span style="color:#888;">insuffisant</span>';
+    var ecart = (s.fdep_vs_nat > 0 ? '+' : '') + s.fdep_vs_nat;
+
+    return ''
+      + '<div class="section-title">📍 ' + dep + ' — ' + s.nom + '</div>'
+      + '<div class="card highlight">'
+      +   '<div style="font-size:11px; color:#7f8c8d; text-transform:uppercase; font-weight:600;">Zone prioritaire EEPATHO</div>'
+      +   '<div class="big-number risk-' + rCls + '">' + s.pct_class33.toFixed(1) + ' %</div>'
+      +   '<div style="font-size:12px; color:#666;">double peine &nbsp;<span class="badge ' + rCls + '">' + rTxt + '</span></div>'
+      + '</div>'
+      + '<div class="card">'
+      +   '<div style="font-size:11px; color:#7f8c8d; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Vue d\'ensemble</div>'
+      +   '<div class="stat-row"><span class="stat-label">Communes</span><span class="stat-value">' + fmtNum(s.n_comm) + '</span></div>'
+      +   '<div class="stat-row"><span class="stat-label">Population</span><span class="stat-value">' + fmtNum(s.pop_tot) + '</span></div>'
+      + '</div>'
+      + '<div class="card">'
+      +   '<div style="font-size:11px; color:#7f8c8d; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Défavorisation (FDep)</div>'
+      +   '<div class="stat-row"><span class="stat-label">Médiane locale</span><span class="stat-value">' + s.fdep_med + '</span></div>'
+      +   '<div class="stat-row"><span class="stat-label">Vs France</span><span class="stat-value">' + arrow + ' ' + ecart + '</span></div>'
+      +   '<div style="font-size:11px; color:#888; margin-top:4px; font-style:italic;">' + lab + '</div>'
+      + '</div>'
+      + '<div class="card">'
+      +   '<div style="font-size:11px; color:#7f8c8d; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Débits de tabac</div>'
+      +   '<div class="stat-row"><span class="stat-label">Total</span><span class="stat-value">' + fmtNum(s.n_debits) + '</span></div>'
+      +   '<div class="stat-row"><span class="stat-label">Densité médiane</span><span class="stat-value">' + s.dens_med + ' /10k</span></div>'
+      +   '<div class="stat-row"><span class="stat-label">Sans débit</span><span class="stat-value">' + s.pct_no_tabac + ' %</span></div>'
+      + '</div>'
+      + '<div class="card">'
+      +   '<div style="font-size:11px; color:#7f8c8d; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Corrélation locale</div>'
+      +   '<div class="stat-row"><span class="stat-label">Spearman FDep×Tabac</span><span class="stat-value">' + corrTxt + '</span></div>'
+      + '</div>';
+  }
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'depChange') {
+      var dep = event.data.dep;
+      var natBox = document.getElementById('stats-national');
+      var depBox = document.getElementById('stats-dept');
+      if (dep === 'all' || !dep) {
+        natBox.style.display = 'block';
+        depBox.innerHTML = '';
+      } else {
+        natBox.style.display = 'none';
+        depBox.innerHTML = buildDeptFiche(dep);
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

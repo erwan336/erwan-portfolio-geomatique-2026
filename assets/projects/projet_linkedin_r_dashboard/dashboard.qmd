@@ -1,0 +1,201 @@
+---
+title: "Dashboard Diabète (Prévalence / Incidence)"
+format: dashboard
+execute:
+  warning: false
+  message: false
+---
+```{r}
+#| label: setup
+#| include: false
+library(sf)
+library(dplyr)
+library(leaflet)
+library(ggplot2)
+library(DT)
+
+clean_utf8 <- function(x) {
+  if (is.character(x)) iconv(x, from = "", to = "UTF-8", sub = "")
+  else x
+}
+
+prev <- st_read("output/carte_prevalence.gpkg", layer = "prev", quiet = TRUE) |>
+  mutate(across(where(is.character), clean_utf8)) |>
+  st_transform(4326) |>
+  st_simplify(dTolerance = 100)
+
+inc <- st_read("output/carte_incidence.gpkg", layer = "inc", quiet = TRUE) |>
+  mutate(across(where(is.character), clean_utf8)) |>
+  st_transform(4326) |>
+  st_simplify(dTolerance = 100)
+
+annees <- sort(unique(prev$annee))
+
+make_map_prev <- function(annee_val) {
+  d <- prev |> filter(annee == annee_val)
+  pal <- colorBin("YlGnBu", domain = d$diabete, bins = 6, na.color = "#bdbdbd")
+  leaflet(d) |>
+    addTiles(group = "OpenStreetMap") |>
+    addProviderTiles(providers$Esri.WorldImagery, group = "Satellite") |>
+    addProviderTiles(providers$Esri.WorldGrayCanvas, group = "Fond clair") |>
+    addPolygons(
+      fillColor = ~pal(diabete), fillOpacity = 0.75,
+      color = "white", weight = 1,
+      popup = ~paste0("<b>", nom_dep, "</b><br/>Prévalence : ", round(diabete, 1))
+    ) |>
+    addLegend(pal = pal, values = ~diabete,
+              title = paste0("Prévalence ", annee_val), opacity = 0.9) |>
+    addLayersControl(
+      baseGroups = c("CartoDB", "OpenStreetMap", "Satellite"),
+      options = layersControlOptions(collapsed = FALSE)
+    )
+}
+
+make_map_inc <- function(annee_val) {
+  d <- inc |> filter(annee == annee_val)
+  pal <- colorBin("YlOrRd", domain = d$diabete, bins = 6, na.color = "#bdbdbd")
+  leaflet(d) |>
+    addTiles(group = "OpenStreetMap") |>
+    addProviderTiles(providers$Esri.WorldImagery, group = "Satellite") |>
+    addProviderTiles(providers$Esri.WorldGrayCanvas, group = "Fond clair") |>
+    addPolygons(
+      fillColor = ~pal(diabete), fillOpacity = 0.75,
+      color = "white", weight = 1,
+      popup = ~paste0("<b>", NOM, "</b><br/>Incidence : ", round(diabete, 1))
+    ) |>
+    addLegend(pal = pal, values = ~diabete,
+              title = paste0("Incidence ", annee_val), opacity = 0.9) |>
+    addLayersControl(
+      baseGroups = c("CartoDB", "OpenStreetMap", "Satellite"),
+      options = layersControlOptions(collapsed = FALSE)
+    )
+}
+```
+
+# Prévalence 2021
+
+## Row
+```{r}
+#| title: "Carte Prévalence 2021"
+make_map_prev(2021)
+```
+
+# Prévalence 2022
+
+## Row
+```{r}
+#| title: "Carte Prévalence 2022"
+make_map_prev(2022)
+```
+
+# Prévalence 2023
+
+## Row
+```{r}
+#| title: "Carte Prévalence 2023"
+make_map_prev(2023)
+```
+
+# Prévalence 2024
+
+## Row
+```{r}
+#| title: "Carte Prévalence 2024"
+make_map_prev(2024)
+```
+
+# Incidence 2021
+
+## Row
+```{r}
+#| title: "Carte Incidence 2021"
+make_map_inc(2021)
+```
+
+# Incidence 2022
+
+## Row
+```{r}
+#| title: "Carte Incidence 2022"
+make_map_inc(2022)
+```
+
+# Incidence 2023
+
+## Row
+```{r}
+#| title: "Carte Incidence 2023"
+make_map_inc(2023)
+```
+
+# Incidence 2024
+
+## Row
+```{r}
+#| title: "Carte Incidence 2024"
+make_map_inc(2024)
+```
+
+# Statistiques
+
+## Row
+```{r}
+#| title: "Évolution Prévalence"
+st_drop_geometry(prev) |>
+  group_by(annee) |>
+  summarise(Moyenne = mean(diabete, na.rm = TRUE),
+            Min = min(diabete, na.rm = TRUE),
+            Max = max(diabete, na.rm = TRUE)) |>
+  ggplot(aes(x = factor(annee), y = Moyenne)) +
+  geom_col(fill = "#2c7bb6", alpha = 0.8) +
+  geom_errorbar(aes(ymin = Min, ymax = Max), width = 0.2, color = "gray40") +
+  labs(title = "Prévalence moyenne par année", x = "Année", y = "Valeur") +
+  theme_minimal(base_size = 13)
+```
+```{r}
+#| title: "Évolution Incidence"
+st_drop_geometry(inc) |>
+  group_by(annee) |>
+  summarise(Moyenne = mean(diabete, na.rm = TRUE),
+            Min = min(diabete, na.rm = TRUE),
+            Max = max(diabete, na.rm = TRUE)) |>
+  ggplot(aes(x = factor(annee), y = Moyenne)) +
+  geom_col(fill = "#d73027", alpha = 0.8) +
+  geom_errorbar(aes(ymin = Min, ymax = Max), width = 0.2, color = "gray40") +
+  labs(title = "Incidence moyenne par année", x = "Année", y = "Valeur") +
+  theme_minimal(base_size = 13)
+```
+
+## Row
+```{r}
+#| title: "Top 10 — Prévalence 2024"
+st_drop_geometry(prev) |>
+  filter(annee == 2024) |>
+  arrange(desc(diabete)) |> slice(1:10) |>
+  ggplot(aes(x = reorder(nom_dep, diabete), y = diabete)) +
+  geom_col(fill = "#2c7bb6") +
+  coord_flip() +
+  labs(title = "Top 10 départements — Prévalence 2024", x = "", y = "Valeur") +
+  theme_minimal(base_size = 13)
+```
+```{r}
+#| title: "Top 10 — Incidence 2024"
+st_drop_geometry(inc) |>
+  filter(annee == 2024) |>
+  arrange(desc(diabete)) |> slice(1:10) |>
+  ggplot(aes(x = reorder(NOM, diabete), y = diabete)) +
+  geom_col(fill = "#d73027") +
+  coord_flip() +
+  labs(title = "Top 10 départements — Incidence 2024", x = "", y = "Valeur") +
+  theme_minimal(base_size = 13)
+```
+
+## Row
+```{r}
+#| title: "Tableau Prévalence 2024"
+datatable(
+  st_drop_geometry(prev) |> filter(annee == 2024) |>
+    select(code_dep, nom_dep, annee, diabete),
+  options = list(pageLength = 10), rownames = FALSE
+)
+```
